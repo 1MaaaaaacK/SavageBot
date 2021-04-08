@@ -3,10 +3,10 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 const { panelApiKey } = require('../../configs/config_privateInfos');
 const { serversInfos } = require('../../configs/config_geral');
+const { cargosCertos } = require('../../configs/config_geral');
 
 module.exports.run = async (client, message, args) => {
     if (!message.member.roles.cache.has('711022747081506826')) return;
-    console.log(panelApiKey);
     message.delete({ timeout: 1000 });
     let splitarg = args.join(' ').split(' - ');
 
@@ -27,6 +27,10 @@ module.exports.run = async (client, message, args) => {
     if (!extra) {
         extra = 'Inexistentes';
     }
+    if (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554')
+        return message.channel
+            .send(`😫 **|** <@${message.author.id}> Voce não pode ter o 1Mack como alvo :)`)
+            .then((m) => m.delete({ timeout: 15000 }));
     tempo = parseInt(tempo);
     if ((!isNaN(tempo) && Number.isInteger(tempo)) == false)
         return message.channel
@@ -36,6 +40,12 @@ module.exports.run = async (client, message, args) => {
             .then((m) => m.delete({ timeout: 15000 }));
 
     cargo = cargo.toLowerCase();
+    if (cargosCertos.find((m) => m == cargo) == undefined)
+        return message.channel
+            .send(
+                `😫 **|** <@${message.author.id}> ***Voce digitou o cargo errado, os cargos certos são:*** \n\`\`\`vip, mod, modplus, adm, admplus, diretor\`\`\``
+            )
+            .then((m) => m.delete({ timeout: 15000 }));
     servidor = servidor.toLowerCase();
     let dataInicial = Date.now();
     dataInicial = Math.floor(dataInicial / 1000);
@@ -73,7 +83,23 @@ module.exports.run = async (client, message, args) => {
             { name: 'Observações', value: extra }
         )
         .setFooter(`Setado Pelo ${message.author.username}`);
-
+    const vipSendMSG = new Discord.MessageEmbed()
+        .setColor('F0FF00')
+        .setTitle(`Olá ${fetchUser.username}`)
+        .setDescription(
+            `***A sua compra foi concluída com sucesso!***\n\nAgradecemos pela confiança e esperamos que você se divirta com seu novo cargo 🥳`
+        )
+        .addFields(
+            { name: '**Cargo**', value: `\`\`\`${cargo.toUpperCase()}\`\`\`` },
+            { name: '**Tempo de Duração**', value: `\`\`\`${tempo} Dias\`\`\`` },
+            { name: '**Servidor Escolhido**', value: `\`\`\`${servidor.toUpperCase()}\`\`\`` }
+        );
+    const vipSendAllMSG = new Discord.MessageEmbed()
+        .setColor('F0FF00')
+        .setTitle(cargo == 'vip' ? '***Novo VIP***' : '***Novo Staff***')
+        .addFields({ name: 'Jogador', value: fetchUser.username }, { name: 'Cargo', value: cargo.toUpperCase() })
+        .setThumbnail(fetchUser.avatarURL())
+        .setTimestamp();
     const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
     if (serversInfosFound == undefined)
@@ -168,6 +194,7 @@ module.exports.run = async (client, message, args) => {
                                     }
 
                                     const updatedData = dataArray.join('\n');
+                                    
                                     fs.writeFile(
                                         `./servers/admins_simple_${
                                             serversInfos[serversInfosFound.serverNumber].name
@@ -175,31 +202,51 @@ module.exports.run = async (client, message, args) => {
                                         updatedData,
                                         (err) => {
                                             if (err) throw err;
-
-                                            fs.readFile(
-                                                `./servers/admins_simple_${
-                                                    serversInfos[serversInfosFound.serverNumber].name
-                                                }.txt`,
-                                                'utf8',
-                                                function (err, data) {
-                                                    fetch(
-                                                        `https://panel.mjsv.us/api/client/servers/${
-                                                            serversInfos[serversInfosFound.serverNumber].identifier
-                                                        }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
-                                                        {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Content-Type': 'text/plain',
-                                                                Accept: 'application/json',
-                                                                Authorization: `Bearer ${panelApiKey.api}`,
-                                                            },
-                                                            body: data,
-                                                        }
-                                                    );
-
-                                                    if (err) return err;
-                                                }
-                                            );
+                                            try {
+                                                fs.readFile(
+                                                    `./servers/admins_simple_${
+                                                        serversInfos[serversInfosFound.serverNumber].name
+                                                    }.txt`,
+                                                    'utf8',
+                                                    function (err, data) {
+                                                        fetch(
+                                                            `https://panel.mjsv.us/api/client/servers/${
+                                                                serversInfos[serversInfosFound.serverNumber].identifier
+                                                            }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                                                            {
+                                                                method: 'POST',
+                                                                headers: {
+                                                                    'Content-Type': 'text/plain',
+                                                                    Accept: 'application/json',
+                                                                    Authorization: `Bearer ${panelApiKey.api}`,
+                                                                },
+                                                                body: data,
+                                                            }
+                                                        );
+    
+                                                        if (err) return err;
+                                                    }
+                                                );
+                                            } catch (error) {
+                                                return console.log(error)
+                                            }
+                                           
+                                            try {
+                                                fetch(
+                                                    `https://panel.mjsv.us/api/client/servers/${
+                                                        serversInfos[serversInfosFound.serverNumber].identifier
+                                                    }/command`,
+                                                    {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            Accept: 'application/json',
+                                                            Authorization: `Bearer ${panelApiKey.api}`,
+                                                        },
+                                                        body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                                                    }
+                                                );
+                                            } catch {}
                                             message.channel
                                                 .send(
                                                     `✅ **|** O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso!!!`
@@ -215,12 +262,11 @@ module.exports.run = async (client, message, args) => {
                                             } else {
                                                 message.guild.members.cache
                                                     .get(usuarioId)
-                                                    .roles.add([
-                                                        serversInfosFound.tagVip,
-                                                        '753728995849142364',
-                                                    ]);
+                                                    .roles.add([serversInfosFound.tagVip, '753728995849142364']);
                                             }
                                             canal.send(logVip);
+                                            fetchUser.send(vipSendMSG);
+                                            client.channels.cache.get('826064960824148020').send(vipSendAllMSG);
                                         }
                                     );
                                 } else if (
@@ -250,30 +296,51 @@ module.exports.run = async (client, message, args) => {
                     `\r\n"${steamid}"  "@${cargo}"  //${fetchedUser.user.username} (${DataFinalUTC} - DC${usuarioId} - ${dataFinal})`,
                     function (err) {
                         if (err) return err;
-
-                        fs.readFile(
-                            `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-                            'utf8',
-                            function (err, data) {
-                                fetch(
-                                    `https://panel.mjsv.us/api/client/servers/${
-                                        serversInfos[serversInfosFound.serverNumber].identifier
-                                    }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
-                                    {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'text/plain',
-                                            Accept: 'application/json',
-                                            Authorization: `Bearer ${panelApiKey.api}`,
-                                        },
-                                        body: data,
-                                    }
+                        try {
+                            fs.readFile(
+                                `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
+                                'utf8',
+                                async function (err, data) {
+                                    await fetch(
+                                        `https://panel.mjsv.us/api/client/servers/${
+                                            serversInfos[serversInfosFound.serverNumber].identifier
+                                        }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                                        {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'text/plain',
+                                                Accept: 'application/json',
+                                                Authorization: `Bearer ${panelApiKey.api}`,
+                                            },
+                                            body: data,
+                                        }
+                                    );
+                                }
                                 );
+                        } catch (error) {
+                            return console.log(error)
+                        }
+                     
+    
+                                try {
+                                    fetch(
+                                        `https://panel.mjsv.us/api/client/servers/${
+                                            serversInfos[serversInfosFound.serverNumber].identifier
+                                        }/command`,
+                                        {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                Accept: 'application/json',
+                                                Authorization: `Bearer ${panelApiKey.api}`,
+                                            },
+                                            body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                                        }
+                                    );
+                                } catch {}
 
                                 if (err) return err;
-                            }
-                        );
-
+                         
                         message.channel
                             .send(
                                 `✅ **|** O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso!!!`
@@ -287,9 +354,13 @@ module.exports.run = async (client, message, args) => {
                                 .get(usuarioId)
                                 .setNickname('Savage | ' + fetchedUser.user.username);
                         } else {
-                            message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagVip,'753728995849142364']);
+                            message.guild.members.cache
+                                .get(usuarioId)
+                                .roles.add([serversInfosFound.tagVip, '753728995849142364']);
                         }
                         canal.send(logVip);
+                        fetchUser.send(vipSendMSG);
+                        client.channels.cache.get('826064960824148020').send(vipSendAllMSG);
                     }
                 );
             }

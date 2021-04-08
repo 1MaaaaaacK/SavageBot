@@ -4,7 +4,7 @@ const { panelApiKey } = require('../../configs/config_privateInfos');
 const { serversInfos } = require('../../configs/config_geral');
 const fetch = require('node-fetch');
 
-const { DEMOTARtutorial, DEMOTARserverError, DEMOTARgerenteError } = require('../../embed/error')
+const { DEMOTARtutorial, DEMOTARserverError, DEMOTARgerenteError } = require('../../embed/error');
 
 module.exports.run = async (client, message, args) => {
     if (!message.member.roles.cache.has('711022747081506826')) return;
@@ -17,23 +17,21 @@ module.exports.run = async (client, message, args) => {
         extra = splitarg[2];
 
     if (!steamid || !servidor || !extra)
+        return message.channel.send(DEMOTARtutorial(message)).then((m) => m.delete({ timeout: 10000 }));
+    if (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554')
         return message.channel
-            .send(DEMOTARtutorial(message))
-            .then((m) => m.delete({ timeout: 10000 }));
+            .send(`😫 **|** <@${message.author.id}> Voce não pode ter o 1Mack como alvo :)`)
+            .then((m) => m.delete({ timeout: 15000 }));
 
     servidor = servidor.toLowerCase();
 
     const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
     if (serversInfosFound == undefined)
-        return message.channel
-            .send(DEMOTARserverError(message))
-            .then((m) => m.delete({ timeout: 7000 }));
+        return message.channel.send(DEMOTARserverError(message)).then((m) => m.delete({ timeout: 7000 }));
 
     if (!message.member.roles.cache.has(serversInfos.find((m) => m.name == servidor).gerenteRole))
-        return message.channel
-            .send(DEMOTARgerenteError(message))
-            .then((m) => m.delete({ timeout: 7000 }));
+        return message.channel.send(DEMOTARgerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
 
     let guild = client.guilds.cache.get('792575394271592458');
     const canal = guild.channels.cache.find((channel) => channel.id === '792576104681570324');
@@ -176,6 +174,22 @@ module.exports.run = async (client, message, args) => {
                                                 body: data2,
                                             }
                                         );
+                                        try {
+                                            fetch(
+                                                `https://panel.mjsv.us/api/client/servers/${
+                                                    serversInfos[serversInfosFound.serverNumber].identifier
+                                                }/command`,
+                                                {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        Accept: 'application/json',
+                                                        Authorization: `Bearer ${panelApiKey.api}`,
+                                                    },
+                                                    body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                                                }
+                                            );
+                                        } catch {}
                                     }
                                 );
 
@@ -191,47 +205,38 @@ module.exports.run = async (client, message, args) => {
                                         { name: 'Observações', value: extra }
                                     )
                                     .setFooter(`Demotado Pelo ${message.author.username}`);
+                                const demotedSendMSG = new Discord.MessageEmbed()
+                                    .setColor('FF0000')
+                                    .setTitle(`Olá ${fetchUser.username}`)
+                                    .setDescription(
+                                        `***Você foi demotado!!***\n\nAgradecemos o tempo que passou conosco, porém tudo uma hora chega ao Fim...`
+                                    )
+                                    .addFields(
+                                        { name: '**STEAMID**', value: `\`\`\`${steamid}\`\`\`` },
+                                        { name: '**Servidor**', value: `\`\`\`${servidor.toUpperCase()}\`\`\`` },
+                                        { name: '**Motivo**', value: `\`\`\`${extra}\`\`\`` }
+                                    );
                                 if (fetchedUser != undefined) {
                                     if (fetchedUser.nickname != null) {
                                         cont = 0;
-                                        let contComprado = 0;
 
                                         for (let x = 0; x < serversInfos.length; x++) {
                                             for (let i in fetchedUser._roles) {
                                                 if (fetchedUser._roles[i] == serversInfos[x].tagDoCargo) {
                                                     cont = cont + 1;
                                                 } else if (fetchedUser._roles[i] == serversInfos[x].tagComprado) {
-                                                    contComprado = contComprado + 1;
+                                                    cont = cont + 1;
                                                 }
                                             }
                                         }
-
                                         if (cont > 1) {
                                             fetchedUser.roles.remove(serversInfosFound.tagDoCargo);
+                                            fetchedUser.roles.remove(serversInfosFound.tagComprado);
                                         } else {
                                             fetchedUser.roles.remove([
                                                 serversInfos.find((m) => m.name == servidor).tagDoCargo,
                                                 '722814929056563260',
-                                            ]);
-                                            fetchedUser.setNickname(fetchedUser.nickname.substr(9)).catch((error) => {
-                                                message.channel
-                                                    .send(
-                                                        `**<@${message.author.id}> | Não consegui renomear o player, tente fazer isso manualmente!**`
-                                                    )
-                                                    .then((m) =>
-                                                        m.delete({
-                                                            timeout: 12000,
-                                                        })
-                                                    );
-                                                console.log(error);
-                                            });
-                                        }
-                                        if (contComprado > 1) {
-                                            fetchedUser.roles.remove(serversInfosFound.tagComprado);
-                                        } else {
-                                            fetchedUser.roles.remove([
                                                 serversInfos.find((m) => m.name == servidor).tagComprado,
-                                                '722814929056563260',
                                             ]);
                                             fetchedUser.setNickname(fetchedUser.nickname.substr(9)).catch((error) => {
                                                 message.channel
@@ -249,6 +254,8 @@ module.exports.run = async (client, message, args) => {
                                     }
                                 }
                                 await canal.send(logDemoted);
+                                fetchUser.send(demotedSendMSG);
+
                                 message.channel
                                     .send(`**<@${message.author.id}> | Staff demotado com sucesso!!**`)
                                     .then((m) => m.delete({ timeout: 5000 }));

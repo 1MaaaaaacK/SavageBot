@@ -3,8 +3,8 @@ const client = new Discord.Client();
 const { botConfig } = require('./configs/config_privateInfos');
 const { webhookVipExpirado, webhookIpServidores } = require('./configs/config_webhook');
 const { serversInfos } = require('./configs/config_geral');
-/* const { checagem } = require('./handle/check.js');
-const { mapUpdate } = require('./handle/map'); */
+const { checagem } = require('./handle/check.js');
+const { mapUpdate } = require('./handle/map');
 
 client.on('ready', () => {
     console.log('Conectado como ' + client.user.tag);
@@ -34,7 +34,7 @@ client.on('message', async (message) => {
     if (message.author.bot) return;
 
     if (message.channel.id === '778411417291980830') {
-        if (!message.content.includes('!sugestao')) {
+        if (!message.content.includes('!sugestao') && !message.content.includes('!rsugestao')) {
             return (
                 message.delete({ timeout: 1000 }),
                 message.channel
@@ -135,7 +135,7 @@ client.on('message', async (message) => {
             try {
                 await fetchedUser.send(embedVipExpirado);
             } catch (error) {
-                console.log(error);
+                console.log(error) ;
             }
 
             if (fechedUserBool == false) return;
@@ -171,7 +171,9 @@ client.on('message', async (message) => {
 
                 for (let x = 0; x < serversInfos.length; x++) {
                     for (let i in fetchedUser._roles) {
-                        if (fetchedUser._roles[i] == serversInfos[x].tagComprado) {
+                        if (fetchedUser._roles[i] == serversInfos[x].tagDoCargo) {
+                            cont = cont + 1;
+                        } else if (fetchedUser._roles[i] == serversInfos[x].tagComprado) {
                             cont = cont + 1;
                         }
                     }
@@ -205,19 +207,11 @@ client.on('message', async (message) => {
     } else return;
 });
 
-/* setInterval(function () { checagem() }, 86400000);
-setInterval(function () { mapUpdate() }, 300000);  */
-
-/* client.on('guildMemberUpdate', (oldRole, newRole) => {
-    const boostOld = oldRole.roles.cache.find((role) => role.id == '649398805040594946');
-    const boostNew = newRole.roles.cache.find((role) => role.id == '649398805040594946');
-
-    if(!boostOld && boostNew){
-
-    }
-    if(boostOld && !boostNew){
-      
-    }
-}); */
+setInterval(function () {
+    checagem();
+}, 86400000);
+setInterval(function () {
+    mapUpdate();
+}, 300000);
 
 client.login(botConfig.token);

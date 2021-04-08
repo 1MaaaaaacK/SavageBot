@@ -11,12 +11,13 @@ function ADVsucesso(message){
  
 //Ban
 
-function BANucesso (messagem, nick, steamid){
+function BANsucesso (message, nick, steamid){
   const embed = new Discord.MessageEmbed()
     .setColor("#00ff00")
-    .setdescription(`✅ ${message.author} O Player ${nick}, cuja Steamid é ${steamid} foi **banido** com sucesso !`)
+    .setDescription(`✅ ${message.author} O Player ${nick}, cuja Steamid é ${steamid} foi **banido** com sucesso !`)
+    return embed
 }
 
  module.exports = {
-    ADVsucesso, BANucesso
+    ADVsucesso, BANsucesso
  }

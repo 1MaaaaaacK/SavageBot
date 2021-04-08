@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
 const { connection } = require('../../configs/config_privateInfos');
 
-const { BANtutorial, BANplayerError, BANucesso } = require('../../embed/error');
+const { BANtutorial, BANplayerError } = require('../../embed/error');
+const { BANsucesso } = require('../../embed/sucesso');
 
 module.exports.run = async (client, message, args) => {
     if (!message.member.roles.cache.has('778273624305696818')) return;
@@ -14,9 +15,7 @@ module.exports.run = async (client, message, args) => {
         tempo = splitarg[2],
         reason = splitarg[3];
     if (!nick || !steamid || !tempo || !reason)
-        return message.channel
-            .send(BANtutorial(message))
-            .then((m) => m.delete({ timeout: 10000 }));
+        return message.channel.send(BANtutorial(message)).then((m) => m.delete({ timeout: 10000 }));
 
     const logBan = new Discord.MessageEmbed()
         .setColor('#ff0000')
@@ -43,21 +42,12 @@ module.exports.run = async (client, message, args) => {
 
         connection.query(sqlBans, [SqlBan_VALUES], function (err) {
             if (err)
-                return (
-                    client.channels.cache
-                        .get('770401787537522738')
-                        .send(BANplayerError(message)),
-                    console.log(err)
-                );
+                return client.channels.cache.get('770401787537522738').send(BANplayerError(message)), console.log(err);
             client.channels.cache.get('721854111741509744').send(logBan);
-            message.channel
-                .send(BANucesso(message, nick, steamid))
-                .then((m) => m.delete({ timeout: 10000 }));
+            message.channel.send(BANsucesso(message, nick, steamid)).then((m) => m.delete({ timeout: 10000 }));
         });
     } catch (error) {
-        client.channels.cache
-            .get('770401787537522738')
-            .send(BANplayerError(message));
+        client.channels.cache.get('770401787537522738').send(BANplayerError(message));
         console.log(error);
     }
 };
