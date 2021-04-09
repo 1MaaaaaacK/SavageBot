@@ -48,6 +48,10 @@ async function mapUpdate() {
             host: '131.196.196.197',
             port: '27250',
         }),
+        (mix2 = {
+            host: '131.196.196.197',
+            port: '27300',
+        }),
     ];
 
     for (let i in servers) {
@@ -76,7 +80,8 @@ async function mapUpdate() {
         .setImage('https://cdn.discordapp.com/attachments/719223540783775804/730203351521689660/savage.png');
 
     let Embed = new Discord.MessageEmbed().setColor('#5F40C1');
-    let Embed2 = new Discord.MessageEmbed()
+    let Embed2 = new Discord.MessageEmbed().setColor('#5F40C1');
+    let Embed3 = new Discord.MessageEmbed()
         .setColor('#5F40C1')
         .setTimestamp()
         .setFooter('A lista atualizada a cada 5 minutos');
@@ -122,14 +127,33 @@ async function mapUpdate() {
                 },
                 { name: `\u200B`, value: '\u200B' }
             );
+        } else {
+            if (Catch[i].playersTotal !== undefined) {
+                contPlayers += Catch[i].players;
+                contPlayersTotal += Catch[i].playersTotal;
+            }
+            Embed3 = Embed3.addFields(
+                {
+                    name: `<a:diamante:650792674248359936> **${Catch[i].name}** <a:diamante:650792674248359936>`,
+                    value: '\u200B',
+                },
+                { name: '**Mapa**', value: Catch[i].mapa, inline: true },
+                { name: '**Players**', value: `${Catch[i].players}/${Catch[i].playersTotal}`, inline: true },
+                {
+                    name: '**Conexao Direta**',
+                    value: 'steam://connect/' + Catch[i].ip,
+                    inline: true,
+                },
+                { name: `\u200B`, value: '\u200B' }
+            );
         }
     }
     await webhookIpServidoresSend.send({
         username: 'SavageServidores',
         avatarURL: 'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
-        embeds: [EmbedImg, Embed, Embed2],
+        embeds: [EmbedImg, Embed, Embed2, Embed3],
     });
-    let Embed3 = new Discord.MessageEmbed()
+    let Embed4 = new Discord.MessageEmbed()
         .setColor('#5F40C1')
         .setTitle('Players Online')
         .setTimestamp()
@@ -138,7 +162,7 @@ async function mapUpdate() {
     await webhookPlayersTotalSend.send({
         username: 'SavageServidores',
         avatarURL: 'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
-        embeds: [Embed3],
+        embeds: [Embed4],
     });
 }
 module.exports = {

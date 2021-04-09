@@ -5,6 +5,7 @@ const { webhookVipExpirado, webhookIpServidores } = require('./configs/config_we
 const { serversInfos } = require('./configs/config_geral');
 const { checagem } = require('./handle/check.js');
 const { mapUpdate } = require('./handle/map');
+const { functionCargos } = require('./handle/roles');
 
 client.on('ready', () => {
     console.log('Conectado como ' + client.user.tag);
@@ -28,6 +29,8 @@ client.on('ready', () => {
     });
 
     client.user.setActivity('Savage Servidores');
+    client.channels.cache.get("808452907245895722").messages.fetch("808486818331885638");
+
 });
 
 client.on('message', async (message) => {
@@ -205,6 +208,31 @@ client.on('message', async (message) => {
             message.channel.bulkDelete(msgs);
         });
     } else return;
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+    if(user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
+let reactionFunction = true
+    let membro = client.guilds.cache
+        .get('343532544559546368')
+        .members.cache.find((member) => member.id === user.id);
+
+    const setCargos = functionCargos[reaction._emoji.name];
+
+    setCargos(membro, reactionFunction);  
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+    if(user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
+
+    let reactionFunction = false
+    let membro = client.guilds.cache
+        .get('343532544559546368')
+        .members.cache.find((member) => member.id === user.id);
+
+    const setCargos = functionCargos[reaction._emoji.name];
+
+    setCargos(membro, reactionFunction);  
 });
 
 setInterval(function () {
