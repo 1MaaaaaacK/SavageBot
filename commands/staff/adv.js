@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-
 const { ADVtutorial } = require('../../embed/error');
 const { ADVaviso } = require('../../embed/aviso');
 const { ADVsucesso } = require('../../embed/sucesso');

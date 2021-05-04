@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const fs = require('fs');
 const { serversInfos } = require('../../configs/config_geral');
+const { connection } = require('../../configs/config_privateInfos');
 
 module.exports.run = async (client, message, args) => {
     if (!message.member.roles.cache.has('711022747081506826')) return;
@@ -9,12 +9,12 @@ module.exports.run = async (client, message, args) => {
     let splitarg = args.join(' ').split(' - ');
 
     let steamid = splitarg[1],
-        servidor = `${splitarg[0]}`;
+        servidor = String(splitarg[0]).toLowerCase();
 
     if (!servidor)
         return message.channel
             .send(
-                `😫 **|** <@${message.author.id}> Para procurar alguem basta digitar
+                `😫 **|** <@${message.author.id}> Para procurar alguém basta digitar
      ***!procurar - Servidor***
      
      ou
@@ -23,16 +23,18 @@ module.exports.run = async (client, message, args) => {
             )
             .then((m) => m.delete({ timeout: 15000 }));
 
-    servidor = servidor.toLowerCase();
-
     const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
     if (serversInfosFound == undefined)
         return message.channel
             .send(
-                `😫 **| <@${usuarioId}> Você errou o servidor!!!\nOs servidores sao: \njb, dr, mix, awp, retake, retakepistol, ttt, scout, mg**`
+                `😫 **| <@${usuarioId}> Você errou o servidor!!!\nOs servidores sao:**\n\`\`\`${serversInfos.map(
+                    function (server) {
+                        return ` ${server.name}`;
+                    }
+                )}\`\`\``
             )
-            .then((m) => m.delete({ timeout: 7000 }));
+            .then((m) => m.delete({ timeout: 10000 }));
 
     if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
         return message.channel
@@ -41,59 +43,62 @@ module.exports.run = async (client, message, args) => {
             )
             .then((m) => m.delete({ timeout: 7000 }));
 
-    fs.readFile(
-        `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-        { encoding: 'utf-8' },
-        async function (err, data) {
-            if (err) return console.log(err);
-            let dataArray = data.split('\n');
-            if (steamid != undefined) {
-                dataArray = dataArray.filter((m) => m.includes(steamid));
-                dataArray = dataArray.join('\n');
-            } else {
-                dataArray = dataArray.filter((m) => m.includes('STEAM'));
-                dataArray = dataArray.join('\n');
-            }
+    let rows;
+    const con = connection.promise();
 
-            if (dataArray == '')
-                return message.channel
-                    .send(
-                        `**<@${message.author.id}> | Não encontrei ninguém com essa steamid no servidor ${servidor}!**`
-                    )
-                    .then((m) => {
-                        m.delete({ timeout: 6000 });
-                    });
-
-            const logStaffFind = new Discord.MessageEmbed()
-                .setColor('#0099ff')
-                .setTitle(`Players Setados`)
-                .setTimestamp();
+    try {
+        [rows] = await con.query(
+            `select * from vip_sets where ${
+                steamid == undefined ? `server_id =` : `steamid = "${steamid}" AND server_id =`
+            }(select id from vip_servers where server_name = "${servidor}")`
+        );
+    } catch (error) {
+        return (
             message.channel
-                .send(`**<@${message.author.id}> | Te mandei os players setados no seu privado!**`)
-                .then((m) => {
-                    m.delete({ timeout: 6000 });
-                });
+                .send(`${message.author} **| Houve um erro ao procurar os sets, contate o 1Mack para ver o ocorrido!**`)
+                .then((m) => m.delete({ timeout: 10000 })),
+            console.log(error)
+        );
+    }
+    if (rows == '') {
+        return message.channel
+            .send(`**<@${message.author.id}> | Não encontrei ninguém com essa steamid no servidor ${servidor}!**`)
+            .then((m) => {
+                m.delete({ timeout: 6000 });
+            });
+    }
+    let setInfos = rows.map((item) => {
+        return `"${item.steamid}"  "@${item.cargo}" //${
+            item.isVip == 0
+                ? `${item.name}  (${item.discord_id})`
+                : `${item.name} (${item.date_create} - ${item.discord_id} - ${item.date_final})`
+        }`;
+    });
 
-            if (dataArray.length <= 2048) {
-                message.author.send(logStaffFind.setDescription(`\`\`\`${dataArray}\`\`\``));
-            } else {
-                await message.author.send(
-                    logStaffFind.setDescription('**Encontrei muitos sets, vou te enviar em forma de arquivo!**')
-                );
+    setInfos = setInfos.join('\n');
 
-                message.author.send({
-                    files: [
-                        {
-                            attachment: `./servers/admins_simple_${
-                                serversInfos[serversInfosFound.serverNumber].name
-                            }.txt`,
-                            name: `admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-                        },
-                    ],
-                });
-            }
-        }
-    );
+    message.channel.send(`**<@${message.author.id}> | Te mandei os players setados no seu privado!**`).then((m) => {
+        m.delete({ timeout: 6000 });
+    });
+
+    const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 2048 });
+
+    const logStaffFind = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(steamid === undefined ? `Set do Player no servidor ${servidor}` : `Players Setados no ${servidor}`)
+        .setDescription(`\`\`\`${first}\`\`\``);
+
+    if (!rest.length) {
+        return message.author.send('a');
+    }
+
+    await message.author.send(logStaffFind);
+
+    for (const text of rest) {
+        logStaffFind.setDescription(`\`\`\`${text}\`\`\``);
+        logStaffFind.setTitle('');
+        await message.author.send(logStaffFind);
+    }
 };
 
 exports.help = {

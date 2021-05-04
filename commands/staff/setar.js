@@ -4,29 +4,36 @@ const fetch = require('node-fetch');
 const { panelApiKey } = require('../../configs/config_privateInfos');
 const { serversInfos } = require('../../configs/config_geral');
 const { cargosCertos } = require('../../configs/config_geral');
+const { connection } = require('../../configs/config_privateInfos');
 
 module.exports.run = async (client, message, args) => {
-    if (!message.member.roles.cache.has('711022747081506826')) return;
+    if (!message.member.roles.cache.has('711022747081506826') && !message.member.roles.cache.has('831219575588388915'))
+        return;
     message.delete({ timeout: 1000 });
     let splitarg = args.join(' ').split(' - ');
 
-    let discord1 = splitarg[0],
-        steamid = splitarg[1],
-        cargo = `${splitarg[2]}`,
+    let discord1 = String(splitarg[0]),
+        steamid = String(splitarg[1]),
+        cargo = String(splitarg[2]).toLowerCase(),
         tempo = splitarg[3],
         valor = splitarg[4],
-        servidor = `${splitarg[5]}`;
-    extra = splitarg[6];
+        servidor = String(splitarg[5]).toLowerCase(),
+        extra = String(splitarg[6]);
     if (!discord1 || !steamid || !tempo || !cargo || !valor || !servidor)
         return message.channel
             .send(
-                `😫 **|** <@${message.author.id}> Para setar alguem basta digitar ***!setar @ do Player - Steamid - Cargo - Tempo em Dias - Valor - Servidor - Observaçoes(opcional)***`
+                `😫 **|** <@${message.author.id}> Para setar alguem basta digitar ***!setar @ do Player - Steamid - Cargo - Tempo em Dias - Valor - Servidor - Observações(opcional)***`
             )
             .then((m) => m.delete({ timeout: 15000 }));
 
     if (!extra) {
         extra = 'Inexistentes';
     }
+
+    if (steamid.startsWith('STEAM_0')) {
+        steamid = steamid.replace('0', '1');
+    }
+
     if (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554')
         return message.channel
             .send(`😫 **|** <@${message.author.id}> Voce não pode ter o 1Mack como alvo :)`)
@@ -39,20 +46,23 @@ module.exports.run = async (client, message, args) => {
             )
             .then((m) => m.delete({ timeout: 15000 }));
 
-    cargo = cargo.toLowerCase();
     if (cargosCertos.find((m) => m == cargo) == undefined)
         return message.channel
             .send(
                 `😫 **|** <@${message.author.id}> ***Voce digitou o cargo errado, os cargos certos são:*** \n\`\`\`vip, mod, modplus, adm, admplus, diretor\`\`\``
             )
             .then((m) => m.delete({ timeout: 15000 }));
-    servidor = servidor.toLowerCase();
+
     let dataInicial = Date.now();
     dataInicial = Math.floor(dataInicial / 1000);
-    let dataFinal = dataInicial + tempo * 86400;
+    let dataFinal = 0,
+        DataFinalUTC = 0;
 
-    let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString(),
+    if (tempo !== 0) {
+        dataFinal = dataInicial + tempo * 86400;
         DataFinalUTC = new Date(dataFinal * 1000).toLocaleDateString();
+    }
+    let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString();
 
     const usuarioId = discord1.slice(0, -1).substring(3);
 
@@ -77,7 +87,7 @@ module.exports.run = async (client, message, args) => {
             { name: 'discord', value: discord1 },
             { name: 'Steamid', value: steamid },
             { name: 'Data da Compra', value: DataInicialUTC },
-            { name: 'Data Final', value: DataFinalUTC },
+            { name: 'Data Final', value: DataFinalUTC == 0 ? '**PERMANENTE**' : DataFinalUTC },
             { name: 'Cargo', value: cargo },
             { name: 'Valor', value: valor },
             { name: 'Observações', value: extra }
@@ -91,7 +101,7 @@ module.exports.run = async (client, message, args) => {
         )
         .addFields(
             { name: '**Cargo**', value: `\`\`\`${cargo.toUpperCase()}\`\`\`` },
-            { name: '**Tempo de Duração**', value: `\`\`\`${tempo} Dias\`\`\`` },
+            { name: '**Tempo de Duração**', value: `\`\`\`${tempo == 0 ? 'Permanente' : `${tempo} Dias`}\`\`\`` },
             { name: '**Servidor Escolhido**', value: `\`\`\`${servidor.toUpperCase()}\`\`\`` }
         );
     const vipSendAllMSG = new Discord.MessageEmbed()
@@ -105,11 +115,18 @@ module.exports.run = async (client, message, args) => {
     if (serversInfosFound == undefined)
         return message.channel
             .send(
-                `😫 **| <@${usuarioId}> Você errou o servidor!!!\nOs servidores sao: \njb, dr, mix, awp, retake, retakepistol, ttt, scout, mg**`
+                `😫 **| <@${usuarioId}> Você errou o servidor!!!\nOs servidores sao:**\n\`\`\`${serversInfos.map(
+                    function (server) {
+                        return ` ${server.name}`;
+                    }
+                )}\`\`\``
             )
-            .then((m) => m.delete({ timeout: 7000 }));
+            .then((m) => m.delete({ timeout: 10000 }));
 
-    if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
+    if (
+        !message.member.roles.cache.has(serversInfosFound.gerenteRole) &&
+        !message.member.roles.cache.has('831219575588388915')
+    )
         return message.channel
             .send(
                 `😫 **| <@${message.author.id}> Você não pode ter esse servidor como alvo, pois você não é gerente dele!**`
@@ -117,255 +134,166 @@ module.exports.run = async (client, message, args) => {
             .then((m) => m.delete({ timeout: 7000 }));
 
     let guild = client.guilds.cache.get('792575394271592458');
+
     const canal = guild.channels.cache.find((channel) => channel.name === serversInfosFound.canalAlvo);
 
     let isVip = false;
 
     if (cargo == 'vip') {
-        cargo = 'Vip';
         isVip = true;
-    } else if (cargo == 'trial') {
-        cargo = 'TrialP';
-    } else if (cargo == 'mod') {
-        cargo = 'ModP';
-    } else if (cargo == 'modplus') {
-        cargo = 'ModPlusP';
-    } else if (cargo == 'adm') {
-        cargo = 'AdmP';
-    } else if (cargo == 'admplus') {
-        cargo = 'AdmPlusP';
-    } else if (cargo == 'diretor') {
-        cargo = 'DiretorP';
+    } else {
+        cargo = cargo.concat('p');
     }
 
-    fs.readFile(
-        `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-        'utf8',
-        function (err, data) {
-            if (err) throw err;
-            let TotalSteamid = [],
-                dataArray = data.split('\n'),
-                cont = 0;
+    let rows;
+    const con = connection.promise();
 
-            for (let i in dataArray) {
-                if (dataArray[i] == '\r' || dataArray[i] == '') {
-                    dataArray.splice(i, 1);
-                }
+    try {
+        [rows] = await con.query(
+            `select steamid, server_id from vip_sets where steamid = "${steamid}" AND server_id = (select id from vip_servers where server_name = "${servidor}")`
+        );
+    } catch (error) {
+        return (
+            message.channel
+                .send(`${message.author} **| Houve um erro ao setar o player, contate o 1Mack para ver o ocorrido!**`)
+                .then((m) => m.delete({ timeout: 10000 })),
+            console.log(error)
+        );
+    }
 
-                if (dataArray[i] !== undefined) {
-                    if (dataArray[i].match(steamid)) {
-                        TotalSteamid[0 + cont] = i;
-                        cont = cont + 1;
-                    }
-                }
-            }
-            if (TotalSteamid.length >= 1) {
-                message.channel
-                    .send(
-                        `**<@${message.author.id}> | O player que voce esta tentando setar já possui um cargo.
-       ** \n**Digite \`SIM\` - Para eu excluir o cargo anterior e setar o novo **
-       \n**ou**\n\n**Digite \`NAO\` - Para que eu deixe o cargo antigo e não ponha o novo**`
-                    )
-                    .then((m) => {
-                        m.delete({ timeout: 15000 });
-                        let filter = (m) => m.author.id === message.author.id;
-                        m.channel
-                            .awaitMessages(filter, {
-                                max: 1,
-                                time: 15000,
-                                errors: ['time'],
-                            })
-                            .then((message) => {
-                                message = message.first();
-                                message.delete({ timeout: 2000 });
-                                if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
-                                    cont = 0;
-                                    for (let i in TotalSteamid) {
-                                        dataArray.splice(TotalSteamid[i] - cont, 1);
-                                        cont = cont + 1;
-                                    }
-                                    dataArray.push(
-                                        `\r\n"${steamid}"  "@${cargo}"  //${fetchedUser.user.username} (${DataFinalUTC} - DC${usuarioId} - ${dataFinal})`
-                                    );
-                                    for (let i in dataArray) {
-                                        if (dataArray[i] == '\r') {
-                                            dataArray.splice(i, 1);
-                                        }
-                                    }
+    let opa;
 
-                                    const updatedData = dataArray.join('\n');
-                                    
-                                    fs.writeFile(
-                                        `./servers/admins_simple_${
-                                            serversInfos[serversInfosFound.serverNumber].name
-                                        }.txt`,
-                                        updatedData,
-                                        (err) => {
-                                            if (err) throw err;
-                                            try {
-                                                fs.readFile(
-                                                    `./servers/admins_simple_${
-                                                        serversInfos[serversInfosFound.serverNumber].name
-                                                    }.txt`,
-                                                    'utf8',
-                                                    function (err, data) {
-                                                        fetch(
-                                                            `https://panel.mjsv.us/api/client/servers/${
-                                                                serversInfos[serversInfosFound.serverNumber].identifier
-                                                            }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
-                                                            {
-                                                                method: 'POST',
-                                                                headers: {
-                                                                    'Content-Type': 'text/plain',
-                                                                    Accept: 'application/json',
-                                                                    Authorization: `Bearer ${panelApiKey.api}`,
-                                                                },
-                                                                body: data,
-                                                            }
-                                                        );
-    
-                                                        if (err) return err;
-                                                    }
-                                                );
-                                            } catch (error) {
-                                                return console.log(error)
-                                            }
-                                           
-                                            try {
-                                                fetch(
-                                                    `https://panel.mjsv.us/api/client/servers/${
-                                                        serversInfos[serversInfosFound.serverNumber].identifier
-                                                    }/command`,
-                                                    {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                            Accept: 'application/json',
-                                                            Authorization: `Bearer ${panelApiKey.api}`,
-                                                        },
-                                                        body: JSON.stringify({ command: 'sm_reloadadmins' }),
-                                                    }
-                                                );
-                                            } catch {}
-                                            message.channel
-                                                .send(
-                                                    `✅ **|** O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso!!!`
-                                                )
-                                                .then((m) => m.delete({ timeout: 5000 }));
-                                            if (isVip == false) {
-                                                message.guild.members.cache
-                                                    .get(usuarioId)
-                                                    .roles.add([serversInfosFound.tagComprado, '722814929056563260']);
-                                                message.guild.members.cache
-                                                    .get(usuarioId)
-                                                    .setNickname('Savage | ' + fetchedUser.user.username);
-                                            } else {
-                                                message.guild.members.cache
-                                                    .get(usuarioId)
-                                                    .roles.add([serversInfosFound.tagVip, '753728995849142364']);
-                                            }
-                                            canal.send(logVip);
-                                            fetchUser.send(vipSendMSG);
-                                            client.channels.cache.get('826064960824148020').send(vipSendAllMSG);
-                                        }
-                                    );
-                                } else if (
-                                    message.content.toUpperCase() == 'NAO' ||
-                                    message.content.toUpperCase() == 'N'
-                                ) {
-                                    return message.channel
-                                        .send(`Comando abortado!`)
-                                        .then((m) => m.delete({ timeout: 5000 }));
-                                } else {
-                                    return message.channel
-                                        .send(`Resposta invalida, digite o comando novamente, **!setar**`)
-                                        .then((m) => m.delete({ timeout: 5000 }));
-                                }
-                            })
-                            .catch(() => {
-                                return message.channel
-                                    .send(
-                                        '**Você não respondeu a tempo! Digite !setar novamente, após isso você tem apenas 15s para responder __SIM__ ou __NAO__**'
-                                    )
-                                    .then((m) => m.delete({ timeout: 10000 }));
-                            });
+    if (rows != '') {
+        await message.channel
+            .send(
+                `${message.author} **| O player que voce esta tentando setar já possui um cargo.**
+\n**Digite \`SIM\` - Para eu excluir o cargo anterior e setar o novo**
+\n**ou**\n\n**Digite \`NAO\` - Para que eu deixe o cargo antigo e não ponha o novo**`
+            )
+            .then(async (m) => {
+                m.delete({ timeout: 15000 });
+                let filter = (m) => m.author.id === message.author.id;
+                await m.channel
+                    .awaitMessages(filter, {
+                        max: 1,
+                        time: 15000,
+                        errors: ['time'],
+                    })
+                    .then((message) => {
+                        message = message.first();
+                        message.delete({ timeout: 1000 });
+                        if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
+                            return (opa = message.channel
+                                .send('**Abortando1 Comando** <a:savage_loading:837104765338910730>')
+                                .then((m) => m.delete({ timeout: 5000 })));
+                        } else if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
+                            return (opa = 's');
+                        }
+                    })
+                    .catch((err) => {
+                        return (opa = message.channel
+                            .send('**Abortando2 Comando** <a:savage_loading:837104765338910730>')
+                            .then((m) => m.delete({ timeout: 5000 })));
                     });
-            } else {
-                fs.appendFile(
-                    `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-                    `\r\n"${steamid}"  "@${cargo}"  //${fetchedUser.user.username} (${DataFinalUTC} - DC${usuarioId} - ${dataFinal})`,
-                    function (err) {
-                        if (err) return err;
-                        try {
-                            fs.readFile(
-                                `./servers/admins_simple_${serversInfos[serversInfosFound.serverNumber].name}.txt`,
-                                'utf8',
-                                async function (err, data) {
-                                    await fetch(
-                                        `https://panel.mjsv.us/api/client/servers/${
-                                            serversInfos[serversInfosFound.serverNumber].identifier
-                                        }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
-                                        {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'text/plain',
-                                                Accept: 'application/json',
-                                                Authorization: `Bearer ${panelApiKey.api}`,
-                                            },
-                                            body: data,
-                                        }
-                                    );
-                                }
-                                );
-                        } catch (error) {
-                            return console.log(error)
-                        }
-                     
-    
-                                try {
-                                    fetch(
-                                        `https://panel.mjsv.us/api/client/servers/${
-                                            serversInfos[serversInfosFound.serverNumber].identifier
-                                        }/command`,
-                                        {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                Accept: 'application/json',
-                                                Authorization: `Bearer ${panelApiKey.api}`,
-                                            },
-                                            body: JSON.stringify({ command: 'sm_reloadadmins' }),
-                                        }
-                                    );
-                                } catch {}
+            });
+    }
 
-                                if (err) return err;
-                         
-                        message.channel
-                            .send(
-                                `✅ **|** O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso!!!`
-                            )
-                            .then((m) => m.delete({ timeout: 5000 }));
-                        if (isVip == false) {
-                            message.guild.members.cache
-                                .get(usuarioId)
-                                .roles.add([serversInfosFound.tagComprado, '722814929056563260']);
-                            message.guild.members.cache
-                                .get(usuarioId)
-                                .setNickname('Savage | ' + fetchedUser.user.username);
-                        } else {
-                            message.guild.members.cache
-                                .get(usuarioId)
-                                .roles.add([serversInfosFound.tagVip, '753728995849142364']);
-                        }
-                        canal.send(logVip);
-                        fetchUser.send(vipSendMSG);
-                        client.channels.cache.get('826064960824148020').send(vipSendAllMSG);
-                    }
-                );
-            }
-        }
+    try {
+        if (opa === 's') {
+            await con.query(
+                `update vip_sets set name = '${fetchUser.username}'
+            steamid = '${steamid}',
+            discord_id = '${usuarioId}', 
+            cargo = '${cargo}', 
+            date_create = '${DataInicialUTC}', 
+            date_final = '${DataFinalUTC}', 
+            isVip = '1', 
+            valor = '${valor}'
+            WHERE (steamid='${steamid}' OR discord_id='${usuarioId}') AND vip_sets.server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
+            );
+        } else if (opa === undefined) {
+            await con.query(
+                `insert into vip_sets(name, steamid, discord_id, cargo, date_create, date_final, isVip, valor, server_id) 
+                SELECT ${fetchUser.username} ,'${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '${DataFinalUTC}', '1', '${valor}', 
+                vip_servers.id FROM vip_servers WHERE server_name = '${servidor}'`
+            );
+        } else return opa;
+    } catch (error) {
+        return (
+            message.channel
+                .send(`${message.author} **| Houve um erro ao procurar os sets, contate o 1Mack para ver o ocorrido!**`)
+                .then((m) => m.delete({ timeout: 10000 })),
+            console.log(error)
+        );
+    }
+
+    [rows] = await con.query(
+        `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
     );
+    let setInfos = rows.map((item) => {
+        return `"${item.steamid}"  "${item.cargo}" //${item.name}  ${
+            item.isVip == 1 ? `(${item.date_create} - ${item.discord_id} - ${item.date_final})` : `(${item.discord_id})`
+        })`;
+    });
+
+    setInfos = setInfos.join('\n');
+
+    for (let j in serversInfos[serversInfosFound.serverNumber].identifier) {
+        try {
+            await fetch(
+                `https://panel.mjsv.us/api/client/servers/${
+                    serversInfos[serversInfosFound.serverNumber].identifier[1]
+                }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${panelApiKey.api}`,
+                    },
+                    body: setInfos,
+                }
+            );
+        } catch (error) {
+            return (
+                message.channel
+                    .send(`${message.author} **| Não consegui setar o player, entre em contato com o 1Mack**`)
+                    .then((m) => m.delete({ timeout: 7000 })),
+                console.log(error)
+            );
+        }
+
+        try {
+            fetch(
+                `https://panel.mjsv.us/api/client/servers/${
+                    serversInfos[serversInfosFound.serverNumber].identifier[j]
+                }/command`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${panelApiKey.api}`,
+                    },
+                    body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                }
+            );
+        } catch {}
+    }
+
+    message.channel
+        .send(`✅ **|** O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso!!!`)
+        .then((m) => m.delete({ timeout: 5000 }));
+
+    if (isVip == false) {
+        message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagComprado, '722814929056563260']);
+        message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchedUser.user.username);
+    } else {
+        message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagVip, '753728995849142364']);
+    }
+    canal.send(logVip);
+    fetchUser.send(vipSendMSG);
+    client.channels.cache.get('835283126619340830').send(vipSendAllMSG);
 };
 
 exports.help = {

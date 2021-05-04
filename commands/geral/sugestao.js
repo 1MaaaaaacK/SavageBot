@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args) => {
 
     const logSugestao = new Discord.MessageEmbed()
         .setColor('#cce336')
-        .setTitle(`***${message.author.username}***`)
+        .setTitle(`***${message.author.username} (ID${message.author.id})***`)
         .setDescription(`**${sugestao}**`)
         .setFooter('!sugestao para sugerir');
 

@@ -25,6 +25,8 @@ module.exports.run = async (client, message, args) => {
     let timeNow = Date.now();
     timeNow = Math.floor(timeNow / 1000);
 
+  //Tem que fazer uma checagem antes de desbanir
+
     try {
         let sqlDesban = `UPDATE sb_bans SET RemovedBy = 22, RemoveType = "U", RemovedOn = ${timeNow}, ureason = "${reason}" WHERE authid = "${steamid}"`;
 

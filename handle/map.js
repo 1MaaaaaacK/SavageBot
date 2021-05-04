@@ -52,6 +52,10 @@ async function mapUpdate() {
             host: '131.196.196.197',
             port: '27300',
         }),
+        (mg = {
+            host: '131.196.196.197',
+            port: '27310',
+        }),
     ];
 
     for (let i in servers) {
