@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 
 const botConfig = {
-    prefix: '!',
+    prefix: '',
     token: '',
 };
 

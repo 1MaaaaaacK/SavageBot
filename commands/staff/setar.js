@@ -30,7 +30,7 @@ module.exports.run = async (client, message, args) => {
         extra = 'Inexistentes';
     }
 
-    if (steamid.startsWith('STEAM_0')) {
+    if (steamid !== undefined && steamid.startsWith('STEAM_0')) {
         steamid = steamid.replace('0', '1');
     }
 
@@ -60,9 +60,9 @@ module.exports.run = async (client, message, args) => {
 
     if (tempo !== 0) {
         dataFinal = dataInicial + tempo * 86400;
-        DataFinalUTC = new Date(dataFinal * 1000).toLocaleDateString();
+        DataFinalUTC = new Date(dataFinal * 1000).toLocaleDateString('en-GB');
     }
-    let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString();
+    let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString('en-GB');
 
     const usuarioId = discord1.slice(0, -1).substring(3);
 
@@ -135,7 +135,9 @@ module.exports.run = async (client, message, args) => {
 
     let guild = client.guilds.cache.get('792575394271592458');
 
-    const canal = guild.channels.cache.find((channel) => channel.name === serversInfosFound.canalAlvo);
+    const canal = guild.channels.cache.find(
+        (channel) => channel.name === serversInfosFound.canalAlvo && channel.parentID == '792575394271592459'
+    );
 
     let isVip = false;
 
@@ -201,7 +203,7 @@ module.exports.run = async (client, message, args) => {
     try {
         if (opa === 's') {
             await con.query(
-                `update vip_sets set name = '${fetchUser.username}'
+                `update vip_sets set name = '${fetchUser.username}',
             steamid = '${steamid}',
             discord_id = '${usuarioId}', 
             cargo = '${cargo}', 
@@ -214,7 +216,7 @@ module.exports.run = async (client, message, args) => {
         } else if (opa === undefined) {
             await con.query(
                 `insert into vip_sets(name, steamid, discord_id, cargo, date_create, date_final, isVip, valor, server_id) 
-                SELECT ${fetchUser.username} ,'${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '${DataFinalUTC}', '1', '${valor}', 
+                SELECT '${fetchUser.username}' ,'${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '${DataFinalUTC}', '1', '${valor}', 
                 vip_servers.id FROM vip_servers WHERE server_name = '${servidor}'`
             );
         } else return opa;
@@ -226,12 +228,16 @@ module.exports.run = async (client, message, args) => {
             console.log(error)
         );
     }
+    try {
+        [rows] = await con.query(
+            `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
+        );
+    } catch (error) {
+        return console.log(error);
+    }
 
-    [rows] = await con.query(
-        `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
-    );
     let setInfos = rows.map((item) => {
-        return `"${item.steamid}"  "${item.cargo}" //${item.name}  ${
+        return `"${item.steamid}"  "@${item.cargo}" //${item.name}  ${
             item.isVip == 1 ? `(${item.date_create} - ${item.discord_id} - ${item.date_final})` : `(${item.discord_id})`
         })`;
     });
@@ -242,7 +248,7 @@ module.exports.run = async (client, message, args) => {
         try {
             await fetch(
                 `https://panel.mjsv.us/api/client/servers/${
-                    serversInfos[serversInfosFound.serverNumber].identifier[1]
+                    serversInfos[serversInfosFound.serverNumber].identifier[j]
                 }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
                 {
                     method: 'POST',

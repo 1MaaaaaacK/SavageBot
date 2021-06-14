@@ -9,7 +9,7 @@ const serversInfos = [
         serverNumber: 0,
         identifier: [''],
     },
-   
+    
 ];
 
 const cargosCertos = ['vip', 'trial', 'mod', 'modplus', 'adm', 'admplus', 'diretor', 'dono'];

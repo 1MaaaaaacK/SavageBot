@@ -23,6 +23,10 @@ module.exports.run = async (client, message, args) => {
             )
             .then((m) => m.delete({ timeout: 15000 }));
 
+    if (steamid !== undefined && steamid.startsWith('STEAM_0')) {
+        steamid = steamid.replace('0', '1');
+    }
+
     const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
     if (serversInfosFound == undefined)
@@ -81,15 +85,15 @@ module.exports.run = async (client, message, args) => {
         m.delete({ timeout: 6000 });
     });
 
-    const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 2048 });
+    const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 2042 });
 
     const logStaffFind = new Discord.MessageEmbed()
         .setColor('#0099ff')
-        .setTitle(steamid === undefined ? `Set do Player no servidor ${servidor}` : `Players Setados no ${servidor}`)
+        .setTitle(steamid !== undefined ? `Set do Player no servidor ${servidor}` : `Players Setados no ${servidor}`)
         .setDescription(`\`\`\`${first}\`\`\``);
 
     if (!rest.length) {
-        return message.author.send('a');
+        return message.author.send(logStaffFind);
     }
 
     await message.author.send(logStaffFind);

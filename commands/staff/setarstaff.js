@@ -26,7 +26,7 @@ module.exports.run = async (client, message, args) => {
         extra = false;
     }
 
-    if (steamid.startsWith('STEAM_0')) {
+    if (steamid !== undefined && steamid.startsWith('STEAM_0')) {
         steamid = steamid.replace('0', '1');
     }
 
@@ -194,7 +194,7 @@ module.exports.run = async (client, message, args) => {
         `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
     );
     let setInfos = rows.map((item) => {
-        return `"${item.steamid}"  "${item.cargo}" //${item.name}  ${
+        return `"${item.steamid}"  "@${item.cargo}" //${item.name}  ${
             item.isVip == 1 ? `(${item.date_create} - ${item.discord_id} - ${item.date_final})` : `(${item.discord_id})`
         })`;
     });

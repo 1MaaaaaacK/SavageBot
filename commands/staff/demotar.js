@@ -134,11 +134,9 @@ module.exports.run = async (client, message, args) => {
     }
 
     let setInfos = rows.map((item) => {
-        if (rows.isVip == 0) {
-            return `"${item.steamid}"  "${item.cargo}" //${fetchedUser.user.username} (${item.date_create} - ${item.discord_id} - ${item.date_final})`;
-        } else {
-            return `"${item.steamid}"  "${item.cargo}" //${fetchedUser.user.username} (${item.discord_id})`;
-        }
+        return `"${item.steamid}"  "@${item.cargo}" //${item.name}  ${
+            item.isVip == 1 ? `(${item.date_create} - ${item.discord_id} - ${item.date_final})` : `(${item.discord_id})`
+        })`;
     });
 
     setInfos = setInfos.join('\n');

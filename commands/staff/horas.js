@@ -9,11 +9,11 @@ module.exports.run = async (client, message, args) => {
     let splitarg = args.join(' ').split(' - ');
 
     let servidor = String(splitarg[0]).toLowerCase(),
-        steamid = `${splitarg[1]}`;
+        steamid = String(splitarg[1]);
 
-    if (!server || !steamid)
+    if (!servidor || !steamid)
         return message.channel
-            .send(`${message.author} **| A forma correta de usar é: !horastaff servidor - steamid**`)
+            .send(`${message.author} **| A forma correta de usar é: !horas servidor - steamid**`)
             .then((m) => m.delete({ timeout: 10000 }));
 
     

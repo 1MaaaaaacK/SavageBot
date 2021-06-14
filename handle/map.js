@@ -9,53 +9,10 @@ var Catch = [];
 async function mapUpdate() {
     const servers = [
         (jailbreak = {
-            host: '131.196.196.197',
-            port: '27170',
+            host: '',
+            port: '',
         }),
-        (deathrun = {
-            host: '131.196.196.197',
-            port: '27080',
-        }),
-        (awp = {
-            host: '131.196.196.197',
-            port: '27090',
-        }),
-        (retake = {
-            host: '131.196.196.197',
-            port: '27130',
-        }),
-        (retakepistol = {
-            host: '131.196.196.197',
-            port: '27150',
-        }),
-        (mix4fun = {
-            host: '131.196.196.197',
-            port: '27190',
-        }),
-        (ttt = {
-            host: '131.196.196.197',
-            port: '27060',
-        }),
-        (surf = {
-            host: '131.196.196.197',
-            port: '27110',
-        }),
-        (retake2 = {
-            host: '131.196.196.197',
-            port: '27260',
-        }),
-        (retakePistol2 = {
-            host: '131.196.196.197',
-            port: '27250',
-        }),
-        (mix2 = {
-            host: '131.196.196.197',
-            port: '27300',
-        }),
-        (mg = {
-            host: '131.196.196.197',
-            port: '27310',
-        }),
+        
     ];
 
     for (let i in servers) {

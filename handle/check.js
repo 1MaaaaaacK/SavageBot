@@ -14,38 +14,35 @@ async function checagem() {
         let dataInicial = Date.now();
         dataInicial = Math.floor(dataInicial / 1000);
 
-        let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString();
-
         try {
             [rows] = await con.query(
-                `select * from vip_sets where date_final < "${DataInicialUTC}" AND date_final != 0 AND server_id = (select id from vip_servers where server_name = "${serversInfos[y].name}")`
+                `select * from vip_sets where date_final != 0 AND server_id = (select id from vip_servers where server_name = "${serversInfos[y].name}")`
             );
         } catch (error) {
             //tratar erro
             console.log(error);
         }
-        if (rows == '') {
-            webhookChecagemLogs.send(
-                `**Procurei no servidor ${serversInfos[y].name} e não achei nenhum cargo expirado!**`,
-                {
-                    username: 'SavageLogs',
-                    avatarURL:
-                        'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
-                }
-            );
-            continue;
-        }
+
+        let newRows = [];
+        let cont = 0;
+
         rows.forEach((m) => {
+            let data_compare = m.date_final.split('/');
+            data_compare = new Date(data_compare[2], data_compare[1] - 1, data_compare[0]).getTime() / 1000;
+            if (data_compare > dataInicial) return;
+            newRows[cont] = m;
+            cont++;
+
             let codigo = Math.floor(Math.random() * (100000 - 10000 + 1)) + 10000;
 
             const logVipExpirado = new Discord.MessageEmbed()
                 .setColor('#0099ff')
-                .setTitle(m.id)
+                .setTitle(m.discord_id)
                 .addFields(
-                    { name: 'Servidor', value: serversInfos[y].name },
+                    { name: 'Servidor', value: 'jb' },
                     {
                         name: 'Informações',
-                        value: `\`\`\`"${m.steamid}  "${m.cargo}"  //"${m.name} (${m.date_create} - ${m.discord_id} - ${m.date_final}\`\`\``,
+                        value: `\`\`\`"${m.steamid}  "@${m.cargo}"  //"${m.name} (${m.date_create} - ${m.discord_id} - ${m.date_final}\`\`\``,
                     },
                     { name: 'Código', value: `\`\`\`${codigo}\`\`\`` }
                 )
@@ -58,8 +55,20 @@ async function checagem() {
             });
         });
 
+        if (newRows == '') {
+            webhookChecagemLogs.send(
+                `**Procurei no servidor ${serversInfos[y].name} e não achei nenhum cargo expirado!**`,
+                {
+                    username: 'SavageLogs',
+                    avatarURL:
+                        'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
+                }
+            );
+            continue;
+        }
+
         try {
-            [rows] = await con.query(`delete FROM vip_sets where id IN (${rows.map((x) => x.id)})`);
+            [rows] = await con.query(`delete FROM vip_sets where id IN (${newRows.map((x) => x.id)})`);
         } catch (error) {
             webhookChecagemLogs.send(`**Não consegui deletar os sets no servidor ${serversInfos[y].name}**`, {
                 username: 'SavageLogs',
@@ -71,13 +80,13 @@ async function checagem() {
         let setInfos;
         try {
             [rows] = await con.query(
-                `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
+                `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${serversInfos[y].name}')`
             );
             setInfos = rows.map((item) => {
                 if (rows.isVip == 0) {
-                    return `"${item.steamid}"  "${item.cargo}" //${fetchedUser.user.username} (${item.date_create} - ${item.discord_id} - ${item.date_final})`;
+                    return `"${item.steamid}"  "@${item.cargo}" //${item.name} (${item.date_create} - ${item.discord_id} - ${item.date_final})`;
                 } else {
-                    return `"${item.steamid}"  "${item.cargo}" //${fetchedUser.user.username} (${item.discord_id})`;
+                    return `"${item.steamid}"  "@${item.cargo}" //${item.name} (${item.discord_id})`;
                 }
             });
         } catch (error) {
@@ -94,8 +103,9 @@ async function checagem() {
         }
 
         setInfos = setInfos.join('\n');
+
         try {
-            fetch(
+            await fetch(
                 `https://panel.mjsv.us/api/client/servers/${serversInfos[y].identifier}/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
                 {
                     method: 'POST',
@@ -119,6 +129,22 @@ async function checagem() {
             console.log(error);
             continue;
         }
+        try {
+            fetch(
+                `https://panel.mjsv.us/api/client/servers/${
+                    serversInfos[serversInfosFound.serverNumber].identifier[j]
+                }/command`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${panelApiKey.api}`,
+                    },
+                    body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                }
+            );
+        } catch {}
     }
 }
 

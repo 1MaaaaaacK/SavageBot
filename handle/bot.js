@@ -29,15 +29,14 @@ client.on('ready', () => {
     });
 
     client.user.setActivity('Savage Servidores');
-    client.channels.cache.get("808452907245895722").messages.fetch("808486818331885638");
-
+    client.channels.cache.get('808452907245895722').messages.fetch('808486818331885638');
 });
 
 client.on('message', async (message) => {
     if (message.author.bot) return;
 
     if (message.channel.id === '778411417291980830') {
-        if (!message.content.toLowerCase().includes('!sugestao') && !message.content.toLowerCase().includes('!rsugestao')) {
+        if (!message.content.includes('!sugestao') && !message.content.includes('!rsugestao')) {
             return (
                 message.delete({ timeout: 1000 }),
                 message.channel
@@ -46,18 +45,6 @@ client.on('message', async (message) => {
                 client.channels.cache
                     .get('770401787537522738')
                     .send(`O <@${message.author.id}> escreveu no canal sugestao e nao usou o comando certo!!!`)
-            );
-        }
-    }else if(message.channel.id === '839706805104803860'){
-        if (!message.content.toLowerCase().includes('!formulario')) {
-            return (
-                message.delete({ timeout: 1000 }),
-                message.channel
-                    .send(`<@${message.author.id}> **Use o comando !formulario**`)
-                    .then((m) => m.delete({ timeout: 10000 })),
-                client.channels.cache
-                    .get('770401787537522738')
-                    .send(`O <@${message.author.id}> escreveu no canal formulario e nao usou o comando certo!!!`)
             );
         }
     }
@@ -69,12 +56,12 @@ client.on('message', async (message) => {
     command = command.slice(botConfig.prefix.length);
 
     let pasta;
-    if (command == 'formulario' || command == 'sugestao') {
+    if (command == 'comandos' || command == 'sugestao' || command == 'form') {
         pasta = 'geral';
     } else {
         pasta = 'staff';
     }
-    command = command.toLowerCase()
+
     try {
         let commandFile = require(`./commands/${pasta}/${command}.js`, ``);
 
@@ -136,7 +123,7 @@ client.on('message', async (message) => {
                         name: 'Como faço para resgatar?',
                         value: `Basta ir no canal: <#757707472663216140>, após isso abra um ticket e escreva a seguinte mensagem:
 
-  \`\`\`fix\nQuero renovar meu plano com o código ${usuarioInfo.codigo}\`\`\``,
+  \`\`\`fix\nQuero renovar meu plano com o código ${usuarioInfo.codigo.slice(3, 8)}\`\`\``,
                         inline: false,
                     },
                     {
@@ -150,7 +137,7 @@ client.on('message', async (message) => {
             try {
                 await fetchedUser.send(embedVipExpirado);
             } catch (error) {
-                console.log(error) ;
+                console.log(error);
             }
 
             if (fechedUserBool == false) return;
@@ -223,33 +210,29 @@ client.on('message', async (message) => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    if(user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
-let reactionFunction = true
-    let membro = client.guilds.cache
-        .get('343532544559546368')
-        .members.cache.find((member) => member.id === user.id);
+    if (user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
+    let reactionFunction = true;
+    let membro = client.guilds.cache.get('343532544559546368').members.cache.find((member) => member.id === user.id);
 
     const setCargos = functionCargos[reaction._emoji.name];
 
-    setCargos(membro, reactionFunction);  
+    setCargos(membro, reactionFunction);
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
-    if(user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
+    if (user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
 
-    let reactionFunction = false
-    let membro = client.guilds.cache
-        .get('343532544559546368')
-        .members.cache.find((member) => member.id === user.id);
+    let reactionFunction = false;
+    let membro = client.guilds.cache.get('343532544559546368').members.cache.find((member) => member.id === user.id);
 
     const setCargos = functionCargos[reaction._emoji.name];
 
-    setCargos(membro, reactionFunction);  
+    setCargos(membro, reactionFunction);
 });
 
- setInterval(function () {
+setInterval(function () {
     checagem();
-}, 43200000); 
+}, 43200000);
 setInterval(function () {
     mapUpdate();
 }, 300000);
