@@ -39,7 +39,7 @@ async function checagem() {
                 .setColor('#0099ff')
                 .setTitle(m.discord_id)
                 .addFields(
-                    { name: 'Servidor', value: 'jb' },
+                    { name: 'Servidor', value: serversInfos[y].name },
                     {
                         name: 'Informações',
                         value: `\`\`\`"${m.steamid}  "@${m.cargo}"  //"${m.name} (${m.date_create} - ${m.discord_id} - ${m.date_final}\`\`\``,
@@ -103,38 +103,34 @@ async function checagem() {
         }
 
         setInfos = setInfos.join('\n');
-
-        try {
-            await fetch(
-                `https://panel.mjsv.us/api/client/servers/${serversInfos[y].identifier}/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                        Accept: 'application/json',
-                        Authorization: `Bearer ${panelApiKey.api}`,
-                    },
-                    body: setInfos,
-                }
-            );
-        } catch (error) {
-            webhookChecagemLogs.send(
-                `**Deletei os sets no servidor ${serversInfos[y].name}, porém não consegui setá-los no servidor!**`,
-                {
-                    username: 'SavageLogs',
-                    avatarURL:
-                        'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
-                }
-            );
-            console.log(error);
-            continue;
-        }
-        try {
-            fetch(
-                `https://panel.mjsv.us/api/client/servers/${
-                    serversInfos[serversInfosFound.serverNumber].identifier[j]
-                }/command`,
-                {
+        for (let j in serversInfos[y].identifier) {
+            try {
+                await fetch(
+                    `https://panel.mjsv.us/api/client/servers/${serversInfos[y].identifier[j]}/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                            Accept: 'application/json',
+                            Authorization: `Bearer ${panelApiKey.api}`,
+                        },
+                        body: setInfos,
+                    }
+                );
+            } catch (error) {
+                webhookChecagemLogs.send(
+                    `**Deletei os sets no servidor ${serversInfos[y].name}, porém não consegui setá-los no servidor!**`,
+                    {
+                        username: 'SavageLogs',
+                        avatarURL:
+                            'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
+                    }
+                );
+                console.log(error);
+                continue;
+            }
+            try {
+                fetch(`https://panel.mjsv.us/api/client/servers/${serversInfos[y].identifier[j]}/command`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,9 +138,9 @@ async function checagem() {
                         Authorization: `Bearer ${panelApiKey.api}`,
                     },
                     body: JSON.stringify({ command: 'sm_reloadadmins' }),
-                }
-            );
-        } catch {}
+                });
+            } catch {}
+        }
     }
 }
 

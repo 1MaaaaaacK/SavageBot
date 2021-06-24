@@ -1,15 +1,16 @@
 {
-  "name": "bot",
+  "name": "botmain",
   "version": "1.0.0",
   "description": "",
   "main": "bot.js",
   "dependencies": {
+    "chalk": "^4.1.1",
     "discord.js": "^12.3.1",
-    "external-ip": "^2.3.1",
     "gamedig": "^2.0.23",
-    "mysql": "^2.18.1",
+    "jsdom": "^16.6.0",
     "mysql2": "^2.2.5",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "pterodactyl.js": "^2.1.1"
   },
   "devDependencies": {
     "prettier": "^2.2.1"
