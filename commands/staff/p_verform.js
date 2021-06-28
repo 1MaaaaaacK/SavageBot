@@ -34,11 +34,6 @@ module.exports = {
 
         const con = connection.promise();
 
-        if (client.channels.cache.find((m) => m.name.includes(`verform${servidor}`)))
-            return message.channel
-                .send(FormAlreadyOpened(message))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
-
         let canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${message.author.id}`);
 
         if (canalCheck === undefined) {
@@ -57,6 +52,8 @@ module.exports = {
                 parent: '818261624317149235',
             });
             canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${message.author.id}`);
+        } else {
+            return message.channel.send(FormAlreadyOpened(message)).then((m) => m.delete({ timeout: 10000 }));
         }
 
         let guild = client.guilds.cache.get('792575394271592458');

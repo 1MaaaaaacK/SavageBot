@@ -28,7 +28,7 @@ exports.TicketCreate = async function (client, reaction, user) {
         })
         .then(async (m) => {
             reaction.message.channel.send(ChannelCreated(user, m)).then((m) => m.delete({ timeout: 5000 }));
-
+            m.send(`${user}`).then((m) => m.delete());
             await m.send(TicketStart(user));
 
             const filter = (m) =>

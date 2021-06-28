@@ -30,6 +30,9 @@ const Options = {
                 deny: ['VIEW_CHANNEL'],
             },
         ]);
+        m.send(`<@&${roles.roleStaff}>, <@&${roles.roleGerente}>, <@&${roles.roleStaffComprado}>`).then(
+            (m) => m.delete()
+        );
         m.send(TicketTypeChoosed(user, 'Bugs', roles.servidor)).then((m) => {
             m.react('<:lock_savage:856224681136226314>');
         });
@@ -63,6 +66,9 @@ const Options = {
                 deny: ['VIEW_CHANNEL'],
             },
         ]);
+        m.send(`<@&${roles.roleStaff}>, <@&${roles.roleGerente}>, <@&${roles.roleStaffComprado}>`).then(
+            (m) => m.delete()
+        );
         m.send(TicketTypeChoosed(user, 'Denúncia', roles.servidor)).then((m) =>
             m.react('<:lock_savage:856224681136226314>')
         );
@@ -96,6 +102,9 @@ const Options = {
                 deny: ['VIEW_CHANNEL'],
             },
         ]);
+        m.send(`<@&${roles.roleStaff}>, <@&${roles.roleGerente}>, <@&${roles.roleStaffComprado}>`).then(
+            (m) => m.delete()
+        );
         m.send(TicketTypeChoosed(user, 'Banimento', roles.servidor)).then((m) =>
             m.react('<:lock_savage:856224681136226314>')
         );
@@ -121,6 +130,7 @@ const Options = {
                 deny: ['VIEW_CHANNEL'],
             },
         ]);
+        m.send(`<@&&${roles.roleGerente}>, <@&&780582159731130378>`).then((m) => m.delete());
         m.send(TicketTypeChoosed(user, 'Compras', roles.servidor)).then((m) =>
             m.react('<:lock_savage:856224681136226314>')
         );
@@ -154,6 +164,9 @@ const Options = {
                 deny: ['VIEW_CHANNEL'],
             },
         ]);
+        m.send(`<@&${roles.roleStaff}>, <@&${roles.roleGerente}>, <@&${roles.roleStaffComprado}>`).then(
+            (m) => m.delete()
+        );
         m.send(TicketTypeChoosed(user, 'Dúvidas', roles.servidor)).then((m) =>
             m.react('<:lock_savage:856224681136226314>')
         );

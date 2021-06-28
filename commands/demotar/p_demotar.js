@@ -144,12 +144,10 @@ module.exports = {
 
         setInfos = setInfos.join('\n');
 
-        for (let j in serversInfos[serversInfosFound.serverNumber].identifier) {
+        for (let j in serversInfosFound.identifier) {
             try {
                 await fetch(
-                    `https://panel.mjsv.us/api/client/servers/${
-                        serversInfos[serversInfosFound.serverNumber].identifier[j]
-                    }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                    `https://panel.mjsv.us/api/client/servers/${serversInfosFound.identifier[j]}/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
                     {
                         method: 'POST',
                         headers: {
@@ -170,20 +168,15 @@ module.exports = {
             }
 
             try {
-                fetch(
-                    `https://panel.mjsv.us/api/client/servers/${
-                        serversInfos[serversInfosFound.serverNumber].identifier[j]
-                    }/command`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Accept: 'application/json',
-                            Authorization: `Bearer ${panelApiKey.api}`,
-                        },
-                        body: JSON.stringify({ command: 'sm_reloadadmins' }),
-                    }
-                );
+                fetch(`https://panel.mjsv.us/api/client/servers/${serversInfosFound.identifier[j]}/command`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${panelApiKey.api}`,
+                    },
+                    body: JSON.stringify({ command: 'sm_reloadadmins' }),
+                });
             } catch {}
         }
 
