@@ -27,17 +27,15 @@ module.exports = {
             );
 
             if (rows == '') {
-                return message.channel.send(PlayerNotFound(message)).then((m) => m.delete({ timeout: 6000 }).catch(() => {}));
+                return message.channel.send(PlayerNotFound(message)).then((m) => m.delete({ timeout: 6000 }));
             }
             await con.query(
                 `UPDATE sb_bans SET RemovedBy = 22, RemoveType = "U", RemovedOn = ${timeNow}, ureason = "${reason}" WHERE authid = "${steamid}"`
             );
             client.channels.cache.get('721854111741509744').send(DesbanLog(steamid, reason, message));
-            message.channel
-                .send(DesbanLog(steamid, reason, message))
-                .then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+            message.channel.send(DesbanLog(steamid, reason, message)).then((m) => m.delete({ timeout: 5000 }));
         } catch (error) {
-            message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 6000 }).catch(() => {}));
+            message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 6000 }));
             console.error(chalk.redBright('Erro no Desbanir'), error);
         }
     },

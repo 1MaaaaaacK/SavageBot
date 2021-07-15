@@ -13,9 +13,7 @@ module.exports = {
             resposta = args[2];
 
         if (valido != 'aprovado' && valido != 'reprovado') {
-            return message.channel
-                .send(WrongUsageOfCommand(message))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongUsageOfCommand(message)).then((m) => m.delete({ timeout: 10000 }));
         }
 
         if (valido == 'aprovado') {

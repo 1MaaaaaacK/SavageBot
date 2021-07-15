@@ -1,14 +1,17 @@
-const { functionCargos } = require('../handle/roles');
+const { functionCargos } = require('../handle/extras/roles');
 const { TicketCreate } = require('../handle/ticket/Create_Ticket');
 const { Reactions } = require('../handle/ticket/Reactions_Ticket');
+const { FormCreate } = require('../handle/formulario/Create_Form');
+
 module.exports = {
     name: 'messageReactionAdd',
     once: 'on',
     async execute(reaction, user, client) {
-        if (reaction.partial) {
+         if (reaction.partial) {
             await reaction.fetch();
         }
         if (user.bot == true || reaction.message.author.bot == false) return;
+
         if (reaction.message.channel.id === '808452907245895722') {
             let reactionFunction = true;
             let membro = client.guilds.cache
@@ -18,13 +21,14 @@ module.exports = {
             const setCargos = functionCargos[reaction._emoji.name];
 
             setCargos(membro, reactionFunction);
-        } else if (reaction.message.channel.id === '855200110685585419') {
-            if (reaction._emoji.id == '856226635694342164')
-                return TicketCreate(client, reaction, user), reaction.users.remove(user.id);
-        } else if (reaction.message.channel.name.includes('ticket→')) {
+        } else if (reaction.message.channel.id === '855200110685585419' && reaction._emoji.id == '856226635694342164') {
+            return TicketCreate(client, reaction, user), reaction.users.remove(user.id);
+        } else if (reaction.message.channel.name.includes('ticket→') || reaction.message.channel.name.includes('fechado')) {
             const setEmoji = await Reactions[reaction._emoji.id];
             if (setEmoji === undefined) return;
             await setEmoji(reaction, user, client);
-        }
+        } else if (reaction.message.channel.id === '839706805104803860' && reaction._emoji.id == '856226635694342164') {
+            return FormCreate(client, reaction, user), reaction.users.remove(user.id);
+        } 
     },
 };

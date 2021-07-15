@@ -1,7 +1,7 @@
 const { connection } = require('../../configs/config_privateInfos');
 const { PlayerDiscordNotFound, InternalServerError } = require('../../embed/geral');
 const chalk = require('chalk');
-const Discord = require('discord.js')
+const Discord = require('discord.js');
 module.exports = {
     name: 'cargos',
     description: 'Ver os cargos do player in-game',
@@ -34,15 +34,13 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 5000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 5000 })),
                 console.error(chalk.redBright('Erro no Banimento'), error)
             );
         }
         if (rows == '') {
             return message.channel.send(`**<@${message.author.id}> | Não encontrei**`).then((m) => {
-                m.delete({ timeout: 7000 }).catch(() => {});
+                m.delete({ timeout: 7000 });
             });
         }
 
@@ -88,9 +86,7 @@ module.exports = {
             }
         });
 
-        message.channel
-            .send('**Te enviei os cargos desse staff no seu PV**')
-            .then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+        message.channel.send('**Te enviei os cargos desse staff no seu PV**').then((m) => m.delete({ timeout: 5000 }));
         await message.author.send(StaffFoundEmbed);
         if (StaffFoundEmbed2.fields != '') {
             await message.author.send(StaffFoundEmbed2);

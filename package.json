@@ -5,7 +5,7 @@
   "main": "bot.js",
   "dependencies": {
     "chalk": "^4.1.1",
-    "discord.js": "^12.3.1",
+    "discord.js": "^12.5.3",
     "gamedig": "^2.0.23",
     "jsdom": "^16.6.0",
     "mysql2": "^2.2.5",

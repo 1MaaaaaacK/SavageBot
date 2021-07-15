@@ -1,9 +1,9 @@
-const { functionCargos } = require('../handle/roles');
+const { functionCargos } = require('../handle/extras/roles');
 module.exports = {
     name: 'messageReactionRemove',
     once: 'on',
     async execute(reaction, user, client) {
-        if (reaction.partial) {
+     /*    if (reaction.partial) {
             await reaction.fetch();
         }
         if (user.bot == true || reaction.message.channel.id !== '808452907245895722') return;
@@ -15,6 +15,6 @@ module.exports = {
 
         const setCargos = functionCargos[reaction._emoji.name];
 
-        setCargos(membro, reactionFunction);
+        setCargos(membro, reactionFunction); */
     },
 };

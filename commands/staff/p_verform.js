@@ -25,9 +25,7 @@ module.exports = {
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel
-                .send(WrongServer(message, serversInfos))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
 
         if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
             return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
@@ -65,15 +63,13 @@ module.exports = {
 
         canal = await canal.map((m) => m);
         if (canal == undefined) {
-            return message.channel
-                .send(FormCompleted(message))
-                .then((m) => m.delete({ timeout: 7000 }).catch(() => {}));
+            return message.channel.send(FormCompleted(message)).then((m) => m.delete({ timeout: 7000 }));
         }
-        message.channel.send(FormCreated(message, canalCheck)).then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+        message.channel.send(FormCreated(message, canalCheck)).then((m) => m.delete({ timeout: 5000 }));
 
         for (let x in canal) {
             let canalAwait = canalCheck;
-            await canalAwait.bulkDelete(100).catch(() => {});
+            await canalAwait.bulkDelete(100);
 
             let discord_id = canal[x].embeds[0].description.match(/\d+/)[0];
 
@@ -87,7 +83,7 @@ module.exports = {
             if (result == '') {
                 let logNotResult = await guild.channels.cache.find((channel) => channel.id == '843580489800745011');
                 logNotResult.send(`**${discord_id}** estava sem respostas no form de **${servidor}**!`);
-                canal[x].delete().catch(() => {});
+                canal[x].delete();
                 continue;
             }
 
@@ -139,12 +135,12 @@ module.exports = {
                 }
             }
 
-            await canalAwait.send(formMessage).catch(() => {});
+            await canalAwait.send(formMessage);
             if (formMessage2.fields != '') {
-                await canalAwait.send(formMessage2).catch(() => {});
+                await canalAwait.send(formMessage2);
             }
             if (formMessage3.fields != '') {
-                await canalAwait.send(formMessage3).catch(() => {});
+                await canalAwait.send(formMessage3);
             }
 
             const filter = (f) =>
@@ -166,9 +162,9 @@ module.exports = {
                         } catch (error) {
                             message.channel
                                 .send(PlayerDiscordNotFound(message))
-                                .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+                                .then((m) => m.delete({ timeout: 12000 }));
                         }
-                        canal[x].delete().catch(() => {});
+                        canal[x].delete();
 
                         await con.query(`delete from form_respostas_2Etapa where discord_id = ${discord_id}`);
 
@@ -182,7 +178,7 @@ module.exports = {
                         } catch (error) {
                             return message.channel
                                 .send(PlayerDiscordNotFound(message))
-                                .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+                                .then((m) => m.delete({ timeout: 12000 }));
                         }
                         message.guild.members.cache.get(discord_id).roles.add('818257971133808660');
 
@@ -194,7 +190,7 @@ module.exports = {
                         );
                         await canalLogInfo.send(logInfos(fetchUser, result));
 
-                        canal[x].delete().catch(() => {});
+                        canal[x].delete();
 
                         await con.query(`delete from form_respostas_2Etapa where discord_id = ${discord_id}`);
                     }
@@ -203,7 +199,7 @@ module.exports = {
                     return (
                         canalAwait.send(`${message.author} **| Você não respondeu a tempo....Deletando Canal**`),
                         setTimeout(async function () {
-                            canalAwait.delete().catch(() => {});
+                            canalAwait.delete();
                         }, 6000)
                     );
                 });
@@ -211,7 +207,7 @@ module.exports = {
 
         await canalCheck.send(FormCompleted(message));
         setTimeout(async function () {
-            canalCheck.delete().catch(() => {});
+            canalCheck.delete();
         }, 6000);
     },
 };

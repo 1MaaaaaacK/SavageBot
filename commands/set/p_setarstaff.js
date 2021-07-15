@@ -4,13 +4,7 @@ const { panelApiKey, connection } = require('../../configs/config_privateInfos')
 const { serversInfos, cargosCertos } = require('../../configs/config_geral');
 
 const { MackNotTarget, WorngTime, AskQuestion, SetSuccess, isDono, staffSendAllMSG } = require('./embed');
-const {
-    GerenteError,
-    WrongRole,
-    PlayerDiscordNotFound,
-    WrongServer,
-    InternalServerError,
-} = require('../../embed/geral');
+const { WrongRole, PlayerDiscordNotFound, WrongServer, InternalServerError } = require('../../embed/geral');
 const chalk = require('chalk');
 
 module.exports = {
@@ -41,24 +35,20 @@ module.exports = {
             (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554') &&
             message.author.id !== '323281577956081665'
         )
-            return message.channel
-                .send(MackNotTarget(message))
-                .then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+            return message.channel.send(MackNotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
 
         if (cargosCertos.find((m) => m == cargo) == undefined || cargo == 'vip')
             return message.channel
                 .send(WrongRole(message, cargosCertos, true))
-                .then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+                .then((m) => m.delete({ timeout: 15000 }));
 
         if (cargo == 'dono' && message.author.id != '323281577956081665')
-            return message.channel.send(isDono(message)).then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+            return message.channel.send(isDono(message)).then((m) => m.delete({ timeout: 5000 }));
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel
-                .send(WrongServer(message, serversInfos))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
 
         const usuarioId = discord1.slice(0, -1).substring(3);
 
@@ -66,9 +56,7 @@ module.exports = {
             var fetchUser = await client.users.fetch(usuarioId);
             var fetchedUser = await client.guilds.cache.get('343532544559546368').members.fetch(fetchUser);
         } catch (error) {
-            return message.channel
-                .send(PlayerDiscordNotFound(message))
-                .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+            return message.channel.send(PlayerDiscordNotFound(message)).then((m) => m.delete({ timeout: 12000 }));
         }
 
         let logStaff = new Discord.MessageEmbed()
@@ -100,16 +88,14 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 7000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 7000 })),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
         let opa = undefined;
         if (rows != '') {
             await message.channel.send(AskQuestion(message)).then(async (m) => {
-                m.delete({ timeout: 15000 }).catch(() => {});
+                m.delete({ timeout: 15000 });
                 let filter = (m) => m.author.id === message.author.id;
                 await m.channel
                     .awaitMessages(filter, {
@@ -119,11 +105,11 @@ module.exports = {
                     })
                     .then((message) => {
                         message = message.first();
-                        message.delete({ timeout: 2000 }).catch(() => {});
+                        message.delete({ timeout: 2000 });
                         if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
                             return (opa = message.channel
                                 .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                                .then((m) => m.delete({ timeout: 5000 }).catch(() => {})));
+                                .then((m) => m.delete({ timeout: 5000 })));
                         } else if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
                             return (opa = 's');
                         }
@@ -133,7 +119,7 @@ module.exports = {
                             .send(
                                 '**Você não respondeu a tempo!!! lembre-se, você tem apenas 15 segundos para responder!** \n***Abortando Comando*** <a:savage_loading:837104765338910730>'
                             )
-                            .then((m) => m.delete({ timeout: 10000 }).catch(() => {})));
+                            .then((m) => m.delete({ timeout: 10000 })));
                     });
             });
         }
@@ -147,7 +133,7 @@ module.exports = {
             if (opa === 's') {
                 await con.query(
                     `update vip_sets set
-            name = '${fetchedUser.user.username}',
+            name = '${fetchedUser.username}',
             steamid = '${steamid}',
             discord_id = '${usuarioId}', 
             cargo = '${cargo}', 
@@ -160,15 +146,13 @@ module.exports = {
             } else if (opa === undefined) {
                 await con.query(
                     `insert into vip_sets(name, steamid, discord_id, cargo, date_create, date_final, isVip, valor, server_id) 
-                SELECT '${fetchedUser.user.username}', '${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '', '0', '', 
+                SELECT '${fetchedUser.username}', '${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '', '0', '', 
                 vip_servers.id FROM vip_servers WHERE server_name = '${servidor}'`
                 );
             } else return opa;
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 7000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 7000 })),
                 console.error(chalk.redBright('Erro no Insert'), error)
             );
         }
@@ -202,9 +186,7 @@ module.exports = {
                 );
             } catch (error) {
                 return (
-                    message.channel
-                        .send(InternalServerError(message))
-                        .then((m) => m.delete({ timeout: 7000 }).catch(() => {})),
+                    message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 7000 })),
                     console.error(chalk.redBright('Erro na Setagem'), error)
                 );
             }
@@ -225,10 +207,7 @@ module.exports = {
         message.channel.send(SetSuccess(message, fetchedUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
         try {
             message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagDoCargo, '722814929056563260']);
-            message.guild.members.cache
-                .get(usuarioId)
-                .roles.remove('818257971133808660')
-                .catch(() => {});
+            message.guild.members.cache.get(usuarioId).roles.remove('818257971133808660');
             message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchedUser.user.username);
         } catch (error) {
             message.channel

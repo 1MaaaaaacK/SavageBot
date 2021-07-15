@@ -1,24 +1,18 @@
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
+
 const { connection, panelApiKey } = require('../../configs/config_privateInfos');
 const { serversInfos, servidoresHoras } = require('../../configs/config_geral');
 
 module.exports = {
     name: 'horasdemotar',
     description: 'Ver as horas in-game dos staffs',
-    usage: 'servidor - steamid',
+    usage: 'servidor',
     cooldown: 0,
     permissions: ['711022747081506826'], // Gerente
     args: 1,
     async execute(client, message, args) {
-        message.delete({ timeout: 1000 });
-        let splitarg = args.join(' ').split(' - ');
-
-        let servidor = String(splitarg[0]).toLowerCase();
-
-        if (!servidor)
-            return message.channel
-                .send(`${message.author} **| A forma correta de usar é: !horasdemotar - servidor**`)
-                .then((m) => m.delete({ timeout: 10000 }));
+        let servidor = String(args[0]).toLowerCase();
 
         const servidoresHorasFound = servidoresHoras.find((m) => m === servidor);
 
@@ -78,18 +72,18 @@ module.exports = {
             and time < '72000'
             and server_id = (select id from vip_servers where server_name = '${servidor}')`
         );
-
         if (result == '') {
             return (
-                await canalCheck.send('Não achei ninguém com hora menor!! Deletando canal'),
-                setTimeout(async function () {
-                    canalCheck.delete();
-                }, 6000)
+                await canalCheck
+                    .send('Não achei ninguém com hora menor!! Deletando canal')
+                    .then((m) => m.delete({ timeout: 5000 })),
+                canalCheck.delete()
             );
         }
 
         for (let i in result) {
-            canalAwait.bulkDelete(100);
+            console.log(result[i]);
+            await canalAwait.bulkDelete(100);
 
             function HourFormat(duration) {
                 var hrs = ~~(duration / 3600);
@@ -105,7 +99,11 @@ module.exports = {
                     { name: 'Steamid', value: `${result[i].steamid}` },
                     { name: 'DiscordID', value: `${result[i].discord_id}` },
                     { name: 'Cargo', value: `${result[i].cargo}` },
-                    { name: 'Horas Jogadas', value: `${HourFormat(result[i].time)}` }
+                    { name: 'Horas Jogadas', value: `${HourFormat(result[i].time)}` },
+                    {
+                        name: 'Setado Dia',
+                        value: `${result[i].date_create == '' ? 'Indefinido' : result[i].date_create}`,
+                    }
                 );
 
             await canalAwait.send(formMessage);
@@ -134,32 +132,32 @@ module.exports = {
                             console.log(error);
                         }
 
-                        await con.query(`delete from watchdog_${servidor} where auth = ${result[i].steamid}`);
-                        await con.query(`delete from vip_sets where steamid = ${result[i].steamid} 
+                        await con.query(`delete from watchdog_${servidor} where auth = '${result[i].steamid}'`);
+                        await con.query(`delete from vip_sets where steamid = '${result[i].steamid}' 
                     and server_id = (select id from vip_servers where server_name = '${servidor}')`);
 
                         const logDemoted = new Discord.MessageEmbed()
                             .setColor('#0099ff')
-                            .setTitle(fetchUser.username)
+                            .setTitle(result[i].name)
                             .addFields(
                                 {
                                     name: 'discord',
-                                    value: fetchUser,
+                                    value: result[i].discord_id,
                                 },
-                                { name: 'Steamid', value: steamid },
+                                { name: 'Steamid', value: result[i].steamid },
                                 { name: 'Servidor', value: servidor.toUpperCase() },
-                                { name: 'Observações', value: extra }
+                                { name: 'Observações', value: 'Tempo Não Cumprido' }
                             )
                             .setFooter(`Demotado Pelo ${message.author.username}`);
 
                         const demotedSendMSG = new Discord.MessageEmbed()
                             .setColor('FF0000')
-                            .setTitle(`Olá ${fetchUser.username}`)
+                            .setTitle(`Olá ${result[i].name}`)
                             .setDescription(
                                 `***Você foi demotado!!***\n\nAgradecemos o tempo que passou conosco, porém tudo uma hora chega ao Fim...`
                             )
                             .addFields(
-                                { name: '**STEAMID**', value: `\`\`\`${steamid}\`\`\`` },
+                                { name: '**STEAMID**', value: `\`\`\`${result[i].steamid}\`\`\`` },
                                 { name: '**Servidor**', value: `\`\`\`${servidor.toUpperCase()}\`\`\`` },
                                 { name: '**Motivo**', value: `\`\`\`Ter menos do que 20 horas\`\`\`` }
                             );
@@ -175,7 +173,7 @@ module.exports = {
                         [result] = await con.query(
                             `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
                         );
-                        let setInfos = rows.map((item) => {
+                        let setInfos = result.map((item) => {
                             return `"${item.steamid}"  "@${item.cargo}" //${item.name}  ${
                                 item.isVip == 1
                                     ? `(${item.date_create} - ${item.discord_id} - ${item.date_final})`
@@ -185,12 +183,10 @@ module.exports = {
 
                         setInfos = setInfos.join('\n');
 
-                        for (let j in serversInfos[serversInfosFound.serverNumber].identifier) {
+                        for (let j in serversInfosFound.identifier) {
                             try {
                                 await fetch(
-                                    `https://panel.mjsv.us/api/client/servers/${
-                                        serversInfos[serversInfosFound.serverNumber].identifier[j]
-                                    }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
+                                    `https://panel.mjsv.us/api/client/servers/${serversInfosFound.identifier[j]}/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
                                     {
                                         method: 'POST',
                                         headers: {
@@ -214,9 +210,7 @@ module.exports = {
 
                             try {
                                 fetch(
-                                    `https://panel.mjsv.us/api/client/servers/${
-                                        serversInfos[serversInfosFound.serverNumber].identifier[j]
-                                    }/command`,
+                                    `https://panel.mjsv.us/api/client/servers/${serversInfosFound.identifier[j]}/command`,
                                     {
                                         method: 'POST',
                                         headers: {
@@ -231,9 +225,10 @@ module.exports = {
                         }
                     }
                 })
-                .catch(() => {
+                .catch((err) => {
                     return (
                         canalAwait.send(`${message.author} **| Você não respondeu a tempo....Deletando Canal**`),
+                        console.log(err),
                         setTimeout(async function () {
                             canalAwait.delete();
                         }, 6000)
@@ -241,9 +236,8 @@ module.exports = {
                 });
         }
 
-        await canalCheck.send('Todos os forms já foram lidos!');
-        setTimeout(async function () {
-            canalCheck.delete();
-        }, 6000);
+        await canalCheck.send('Todos os staffs com baixa hora foram vistos!').then((m) => m.delete({ timeout: 6000 }));
+
+        canalCheck.delete();
     },
 };

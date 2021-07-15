@@ -23,12 +23,10 @@ module.exports = {
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel
-                .send(WrongServer(message, serversInfos))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
 
         if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }).catch(() => {}));
+            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
 
         let rows;
         const con = connection.promise();
@@ -41,15 +39,13 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
         if (rows == '') {
             return message.channel.send(SteamIdNotFound(message, steamid)).then((m) => {
-                m.delete({ timeout: 6000 }.catch(() => {}));
+                m.delete({ timeout: 6000 });
             });
         }
         let setInfos = rows.map((item) => {
@@ -63,7 +59,7 @@ module.exports = {
         setInfos = setInfos.join('\n');
 
         message.channel.send(`**<@${message.author.id}> | Te mandei os players setados no seu privado!**`).then((m) => {
-            m.delete({ timeout: 6000 }).catch(() => {});
+            m.delete({ timeout: 6000 });
         });
 
         const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 2042 });

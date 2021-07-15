@@ -41,32 +41,28 @@ module.exports = {
             (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554') &&
             message.author.id !== '323281577956081665'
         )
-            return message.channel
-                .send(MackNotTarget(message))
-                .then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+            return message.channel.send(MackNotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
 
         tempo = parseInt(tempo);
 
         if ((!isNaN(tempo) && Number.isInteger(tempo)) == false)
-            return message.channel.send(WorngTime(message)).then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+            return message.channel.send(WorngTime(message)).then((m) => m.delete({ timeout: 15000 }));
 
         if (cargosCertos.find((m) => m == cargo) == undefined)
             return message.channel
                 .send(WrongRole(message, cargosCertos, false))
-                .then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+                .then((m) => m.delete({ timeout: 15000 }));
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel
-                .send(WrongServer(message, serversInfos))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
 
         if (
             !message.member.roles.cache.has(serversInfosFound.gerenteRole) &&
             !message.member.roles.cache.has('831219575588388915')
         )
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }).catch(() => {}));
+            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
 
         let dataInicial = Date.now();
         dataInicial = Math.floor(dataInicial / 1000);
@@ -85,9 +81,7 @@ module.exports = {
             var fetchUser = await client.users.fetch(usuarioId);
             var fetchedUser = await client.guilds.cache.get('343532544559546368').members.fetch(fetchUser);
         } catch (error) {
-            return message.channel
-                .send(PlayerDiscordNotFound(message))
-                .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+            return message.channel.send(PlayerDiscordNotFound(message)).then((m) => m.delete({ timeout: 12000 }));
         }
 
         let guild = client.guilds.cache.get('792575394271592458');
@@ -113,9 +107,7 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
@@ -124,7 +116,7 @@ module.exports = {
 
         if (rows != '') {
             await message.channel.send(AskQuestion(message)).then(async (m) => {
-                m.delete({ timeout: 15000 }).catch(() => {});
+                m.delete({ timeout: 15000 });
                 let filter = (m) => m.author.id === message.author.id;
                 await m.channel
                     .awaitMessages(filter, {
@@ -134,11 +126,11 @@ module.exports = {
                     })
                     .then((message) => {
                         message = message.first();
-                        message.delete({ timeout: 1000 }).catch(() => {});
+                        message.delete({ timeout: 1000 });
                         if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
                             return (opa = message.channel
                                 .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                                .then((m) => m.delete({ timeout: 5000 }).catch(() => {})));
+                                .then((m) => m.delete({ timeout: 5000 })));
                         } else if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
                             return (opa = 's');
                         }
@@ -146,7 +138,7 @@ module.exports = {
                     .catch((err) => {
                         return (opa = message.channel
                             .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                            .then((m) => m.delete({ timeout: 5000 }).catch(() => {})));
+                            .then((m) => m.delete({ timeout: 5000 })));
                     });
             });
         }
@@ -173,9 +165,7 @@ module.exports = {
             } else return opa;
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Insert'), error)
             );
         }
@@ -213,9 +203,7 @@ module.exports = {
                 );
             } catch (error) {
                 return (
-                    message.channel
-                        .send(InternalServerError(message))
-                        .then((m) => m.delete({ timeout: 7000 }).catch(() => {})),
+                    message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 7000 })),
                     console.error(chalk.redBright('Erro na Setagem'), error)
                 );
             }
@@ -233,9 +221,7 @@ module.exports = {
             } catch {}
         }
 
-        message.channel
-            .send(SetSuccess(message, fetchedUser, cargo))
-            .then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+        message.channel.send(SetSuccess(message, fetchedUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
 
         if (isVip == false) {
             message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagComprado, '722814929056563260']);

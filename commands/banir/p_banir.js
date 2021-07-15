@@ -28,9 +28,7 @@ module.exports = {
 
             await con.query(sqlBans, [SqlBan_VALUES]);
             client.channels.cache.get('721854111741509744').send(Banlog(nick, steamid, tempo, reason, message));
-            message.channel
-                .send(BanSucess(message, nick, steamid))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            message.channel.send(BanSucess(message, nick, steamid)).then((m) => m.delete({ timeout: 10000 }));
         } catch (error) {
             message.channel.send(BanError(message));
             console.error(chalk.redBright('Erro no Banimento'), error);

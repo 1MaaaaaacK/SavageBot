@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
-const { webhookVipExpirado, webhookSavageLogs } = require('../configs/config_webhook');
-const { serversInfos } = require('../configs/config_geral');
-const { panelApiKey, connection } = require('../configs/config_privateInfos');
+const { webhookVipExpirado, webhookSavageLogs } = require('../../configs/config_webhook');
+const { serversInfos } = require('../../configs/config_geral');
+const { panelApiKey, connection } = require('../../configs/config_privateInfos');
 
 const webhookLogs = new Discord.WebhookClient(webhookVipExpirado.id, webhookVipExpirado.token);
 const webhookChecagemLogs = new Discord.WebhookClient(webhookSavageLogs.id, webhookSavageLogs.token);

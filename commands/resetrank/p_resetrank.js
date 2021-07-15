@@ -22,7 +22,7 @@ module.exports = {
     args: 0,
     async execute(client, message, args) {
         message.channel.send(AskQuestion(message)).then((m) => {
-            m.delete({ timeout: 15000 }).catch(() => {});
+            m.delete({ timeout: 15000 });
 
             let filter = (m) => m.author.id === message.author.id;
             m.channel
@@ -51,7 +51,7 @@ module.exports = {
                                 return (
                                     message.channel
                                         .send(InternalServerError(message))
-                                        .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                                        .then((m) => m.delete({ timeout: 10000 })),
                                     console.error(chalk.redBright('Erro no Select'), error)
                                 );
                             }
@@ -63,7 +63,7 @@ module.exports = {
                                     return (
                                         message.channel
                                             .send(CheckDatabaseError(message, servidores, serverNumber))
-                                            .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                                            .then((m) => m.delete({ timeout: 10000 })),
                                         console.error(chalk.redBright('Erro no Delete'), error)
                                     );
                                 }
@@ -79,7 +79,7 @@ module.exports = {
                                     return (
                                         message.channel
                                             .send(InternalServerError(message))
-                                            .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                                            .then((m) => m.delete({ timeout: 10000 })),
                                         console.error(chalk.redBright('Erro no Select'), error)
                                     );
                                 }
@@ -92,7 +92,7 @@ module.exports = {
                                 } catch (error) {
                                     message.channels
                                         .send(Top1NotFound(message, servidores, serverNumber, procurar))
-                                        .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+                                        .then((m) => m.delete({ timeout: 12000 }));
                                     DeletarRank();
                                     continue;
                                 }
@@ -148,14 +148,14 @@ module.exports = {
                                         return (
                                             message.channel
                                                 .send(InternalServerError(message))
-                                                .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                                                .then((m) => m.delete({ timeout: 10000 })),
                                             console.error(chalk.redBright('Erro no Update'), error)
                                         );
                                     }
                                 } else {
                                     message.channel
                                         .send(`Não teve nenhum **TOP** no servidor **${servidores[serverNumber]}**`)
-                                        .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+                                        .then((m) => m.delete({ timeout: 10000 }));
                                     DeletarRank();
                                     continue;
                                 }
@@ -202,7 +202,7 @@ module.exports = {
                                         return (
                                             message.channel
                                                 .send(InternalServerError(message))
-                                                .then((m) => m.delete({ timeout: 7000 }).catch(() => {})),
+                                                .then((m) => m.delete({ timeout: 7000 })),
                                             console.error(chalk.redBright('Erro na Setagem'), error)
                                         );
                                     }
@@ -225,7 +225,7 @@ module.exports = {
 
                                 message.channel
                                     .send(SetSuccess(message, fetchedUser, servidores, serverNumber))
-                                    .then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+                                    .then((m) => m.delete({ timeout: 5000 }));
 
                                 message.guild.members.cache
                                     .get(procurar.userid)
@@ -252,7 +252,7 @@ module.exports = {
                             } else {
                                 message.channel
                                     .send(`Não teve nenhum **TOP** no servidor **${servidores[serverNumber]}**`)
-                                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+                                    .then((m) => m.delete({ timeout: 10000 }));
                                 DeletarRank();
                                 continue;
                             }
@@ -260,13 +260,13 @@ module.exports = {
                     } else if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
                         message.channel
                             .send('Abortando comando<a:savage_loading:837104765338910730>')
-                            .then((m) => m.delete({ timeout: 6000 }).catch(() => {}));
+                            .then((m) => m.delete({ timeout: 6000 }));
                     }
                 })
                 .catch(() => {
                     message.channel
                         .send('Você não respondeu a tempo, abortando comando<a:savage_loading:837104765338910730>')
-                        .then((m) => m.delete({ timeout: 6000 }).catch(() => {}));
+                        .then((m) => m.delete({ timeout: 6000 }));
                 });
         });
     },

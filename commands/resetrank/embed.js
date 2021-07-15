@@ -1,3 +1,4 @@
+const Discord = require('discord.js')
 exports.CheckDatabaseError = function (message, servidores, serverNumber) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')

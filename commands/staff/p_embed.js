@@ -4,7 +4,7 @@ const { WrongUsage } = require('./embed');
 module.exports = {
     name: 'embed',
     description: 'Enviar Embeds',
-    usage: `cor - titulo - descrição - imagem - rodapé - timestamp
+    usage: `cor - titulo - descrição - imagem - emoji - rodapé - timestamp
         
     OBS: Somente a cor, o titulo e a descrição são obrigatórios!
     
@@ -25,7 +25,7 @@ module.exports = {
         (footer = String(args[5])), (timestamp = String(args[6]));
 
         if (title == 'null' && description == 'null' && image == 'null') {
-            return message.channel.send(WrongUsage(message)).then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+            return message.channel.send(WrongUsage(message)).then((m) => m.delete({ timeout: 15000 }));
         }
         const embed = new Discord.MessageEmbed().setColor(`#${color}`);
 
@@ -46,7 +46,7 @@ module.exports = {
         }
 
         try {
-            if (reactions !== 'undefined' && reactions !== null) {
+            if (reactions !== 'undefined' || reactions !== null) {
                 message.channel.send(embed).then(async (m) => {
                     for (let i in reactions) {
                         await m.react(reactions[i]);
@@ -56,9 +56,7 @@ module.exports = {
                 message.channel.send(embed);
             }
         } catch (error) {
-            return message.channel.send(
-                `${message.author} **| Voce escreveu algo errado, o modo certo é: !embed cor - titulo - descrição - imagem - rodapé - timestamp`
-            );
+            return message.channel.send(`${message.author} **| Voce escreveu algo errado`);
         }
     },
 };

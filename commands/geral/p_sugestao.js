@@ -10,7 +10,7 @@ module.exports = {
         if (message.channel.id !== '778411417291980830')
             return (
                 message.channel.send(WrongChannel(message)).then((m) => {
-                    m.delete({ timeout: 5000 }).catch(() => {});
+                    m.delete({ timeout: 5000 });
                 }),
                 client.channels.cache
                     .get('770401787537522738')

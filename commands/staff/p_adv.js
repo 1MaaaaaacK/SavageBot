@@ -33,7 +33,7 @@ module.exports = {
             adv = '2';
         }
 
-        message.channel.send(AvdSuccess(message)).then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+        message.channel.send(AvdSuccess(message)).then((m) => m.delete({ timeout: 5000 }));
 
         client.channels.cache.get('779013964138414090').send(LogAdv(discord, adv, reason, message));
     },

@@ -12,6 +12,7 @@ const Reactions = {
         reaction.message.channel.updateOverwrite(reaction.message.channel.name.replace('ticket→', ''), {
             VIEW_CHANNEL: false,
         });
+        reaction.message.channel.setName(`fechado→${user.id}`);
         client.channels.cache.get('757709253766283294').send(TicketLog(user, 'Fechado', reaction.message.channel.name));
     },
     '856225547210326046'(reaction, user, client) {
@@ -24,6 +25,7 @@ const Reactions = {
         });
         reaction.message.reactions.removeAll();
         reaction.message.channel.send(TicketOpened(user)).then((m) => m.react('<:lock_savage:856224681136226314>'));
+        reaction.message.channel.setName(`ticket→${user.id}`);
         client.channels.cache.get('757709253766283294').send(TicketLog(user, 'Aberto', reaction.message.channel.name));
     },
     '856212830969659412'(reaction, user, client) {
@@ -44,6 +46,7 @@ const Reactions = {
         //delete
         if (user.id !== '323281577956081665') return; //Mack
         reaction.message.channel.send(TicketDeleting(user));
+        reaction.message.channel.setName(`deletando→${user.id}`);
         setTimeout(() => {
             reaction.message.channel.delete();
         }, 5000);

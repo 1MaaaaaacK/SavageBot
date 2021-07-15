@@ -1,5 +1,5 @@
 const { ArgsFail, MissinPermissions, AwaitCooldown } = require('../embed/geral');
-const { checkChannels } = require('../handle/checkChannels');
+const { checkChannels } = require('../handle/checks/checkChannels');
 const { botConfig } = require('../configs/config_privateInfos');
 const Discord = require('discord.js');
 const chalk = require('chalk');
@@ -9,6 +9,7 @@ module.exports = {
     once: 'on',
     execute(message, client) {
         checkChannels(message, client);
+
         const { cooldowns } = client;
         if (!message.content.startsWith(botConfig.prefix) || message.author.bot) return;
 
@@ -52,8 +53,7 @@ module.exports = {
                 return message.channel.send(MissinPermissions(message)).then((m) => m.delete({ timeout: 8000 }));
         }
         message.delete();
-
-        if (args.length < command.args && command.args !== 0) {
+        if ((args == '' && command.args !== 0) || args.length < command.args) {
             return message.channel
                 .send(ArgsFail(message, botConfig.prefix, command.name, command.usage))
                 .then((m) => m.delete({ timeout: 8000 }));

@@ -28,16 +28,12 @@ module.exports = {
             (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554') &&
             message.author.id !== '323281577956081665'
         )
-            return message.channel
-                .send(MackNotTarget(message))
-                .then((m) => m.delete({ timeout: 15000 }).catch(() => {}));
+            return message.channel.send(MackNotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel
-                .send(WrongServer(message, serversInfos))
-                .then((m) => m.delete({ timeout: 10000 }).catch(() => {}));
+            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
 
         let guild = client.guilds.cache.get('792575394271592458');
         const canal = guild.channels.cache.find((channel) => channel.id === '792576104681570324');
@@ -54,21 +50,19 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
 
         if (rows == '') {
             return message.channel.send(SteamidNotFound(message, servidor)).then((m) => {
-                m.delete({ timeout: 7000 }).catch(() => {});
+                m.delete({ timeout: 7000 });
             });
         }
 
         await message.channel.send(DemotedAskConfirm(message, rows)).then(async (m) => {
-            m.delete({ timeout: 15000 }).catch(() => {});
+            m.delete({ timeout: 15000 });
 
             let filter = (m) => m.author.id === message.author.id;
 
@@ -85,7 +79,7 @@ module.exports = {
                     if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
                         return (opa = message.channel
                             .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                            .then((m) => m.delete({ timeout: 5000 }).catch(() => {})));
+                            .then((m) => m.delete({ timeout: 5000 })));
                     } else if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
                         return (opa = 's');
                     }
@@ -93,7 +87,7 @@ module.exports = {
                 .catch((err) => {
                     return (opa = message.channel
                         .send('**Você não respondeu a tempo, abortando Comando** <a:savage_loading:837104765338910730>')
-                        .then((m) => m.delete({ timeout: 5000 }).catch(() => {})));
+                        .then((m) => m.delete({ timeout: 5000 })));
                 });
         });
 
@@ -106,9 +100,7 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Delete'), error)
             );
         }
@@ -117,9 +109,7 @@ module.exports = {
             var fetchUser = await client.users.fetch(rows[0].discord_id);
             var fetchedUser = await client.guilds.cache.get('343532544559546368').members.fetch(fetchUser);
         } catch (error) {
-            message.channel
-                .send(PlayerDiscordRoleNotFound(message))
-                .then((m) => m.delete({ timeout: 12000 }).catch(() => {}));
+            message.channel.send(PlayerDiscordRoleNotFound(message)).then((m) => m.delete({ timeout: 12000 }));
         }
         try {
             [rows2] = await con.query(
@@ -127,9 +117,7 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel
-                    .send(InternalServerError(message))
-                    .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
@@ -160,9 +148,7 @@ module.exports = {
                 );
             } catch (error) {
                 return (
-                    message.channel
-                        .send(InternalServerError(message))
-                        .then((m) => m.delete({ timeout: 10000 }).catch(() => {})),
+                    message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
                     console.error(chalk.redBright('Erro no Admins_Simple'), error)
                 );
             }
@@ -212,11 +198,9 @@ module.exports = {
                     ]);
                     fetchedUser.setNickname(fetchedUser.nickname.substr(9)).catch((error) => {
                         message.channel.send(RenameError(message)).then((m) =>
-                            m
-                                .delete({
-                                    timeout: 12000,
-                                })
-                                .catch(() => {})
+                            m.delete({
+                                timeout: 12000,
+                            })
                         );
                     });
                 }
@@ -229,6 +213,6 @@ module.exports = {
 
         message.channel
             .send(`**<@${message.author.id}> | Staff demotado com sucesso!!**`)
-            .then((m) => m.delete({ timeout: 5000 }).catch(() => {}));
+            .then((m) => m.delete({ timeout: 5000 }));
     },
 };

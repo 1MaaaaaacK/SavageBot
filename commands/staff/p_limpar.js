@@ -11,7 +11,7 @@ module.exports = {
             includeBot = String(args[1]).toLowerCase();
 
         if (quantidade > 99 || quantidade < 1)
-            return message.channel.send(WrongNumber(message)).then((m) => m.delete({ timeout: 6000 }).catch(() => {}));
+            return message.channel.send(WrongNumber(message)).then((m) => m.delete({ timeout: 6000 }));
         if (includeBot == 'sim' || includeBot == 's') {
             if (message.member.roles.cache.has('603318536798077030')) {
                 includeBot = true;

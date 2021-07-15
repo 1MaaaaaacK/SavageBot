@@ -71,11 +71,11 @@ exports.TicketCreate = async function (client, reaction, user) {
                             ticketOptions(m, user, roles);
                         })
                         .catch((error) => {
-                            return m.delete().catch(() => {}), console.log(error);
+                            return m.delete(), console.log(error);
                         });
                 })
                 .catch(() => {
-                    return m.delete().catch(() => {});
+                    return m.delete();
                 });
         });
 };

@@ -3,7 +3,7 @@ module.exports = {
     name: 'guildMemberAdd',
     once: 'on',
     async execute(member, client) {
-        member.roles.add('808436147054706688');
+       /*  member.roles.add('808436147054706688');
 
         const embed = new Discord.MessageEmbed()
             .setColor('#00F180')
@@ -20,6 +20,6 @@ module.exports = {
             )
             .setFooter(`ID: ${member.user.id}`)
             .setTimestamp();
-        client.channels.cache.get('716023078374867036').send(embed);
+        client.channels.cache.get('716023078374867036').send(embed); */
     },
 };
