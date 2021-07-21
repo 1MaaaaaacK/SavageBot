@@ -42,11 +42,11 @@ process.on('unhandledRejection', (err) => {
     }
 });
 
-/* setInterval(function () {
+setInterval(function () {
     checagem();
 }, 43200000);
 setInterval(function () {
     mapUpdate();
-}, 300000); */
+}, 300000);
 
 client.login(botConfig.token);

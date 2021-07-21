@@ -1,7 +1,7 @@
 const { TicketClosed, TicketOpened, TicketDeleting, TicketSaved, TicketLog } = require('./embed');
 const { Save } = require('./Save_Ticket');
 const Reactions = {
-    '856224681136226314'(reaction, user, client) {
+    async '856224681136226314'(reaction, user, client) {
         //lock
         reaction.message.reactions.removeAll();
         reaction.message.channel.send(TicketClosed(user)).then(async (m) => {
@@ -9,23 +9,23 @@ const Reactions = {
             await m.react('<:save_savage:856212830969659412>');
             await m.react('<:delete_savage:856222528997556244>');
         });
-        reaction.message.channel.updateOverwrite(reaction.message.channel.name.replace('ticket→', ''), {
+        await reaction.message.channel.updateOverwrite(reaction.message.channel.name.replace('ticket→', ''), {
             VIEW_CHANNEL: false,
         });
-        reaction.message.channel.setName(`fechado→${user.id}`);
+        await reaction.message.channel.setName(`fechado→${reaction.message.channel.name.replace('ticket→', '')}`);
         client.channels.cache.get('757709253766283294').send(TicketLog(user, 'Fechado', reaction.message.channel.name));
     },
-    '856225547210326046'(reaction, user, client) {
+    async '856225547210326046'(reaction, user, client) {
         //unlock
         let userFind = reaction.message.guild.members.cache.find((m) => m.id == user.id);
 
         if (userFind._roles.filter((m) => m == '722814929056563260' || m == '603318536798077030') == '') return;
-        reaction.message.channel.updateOverwrite(reaction.message.channel.name.replace('ticket→', ''), {
+        await reaction.message.channel.updateOverwrite(reaction.message.channel.name.replace('fechado→', ''), {
             VIEW_CHANNEL: true,
         });
         reaction.message.reactions.removeAll();
         reaction.message.channel.send(TicketOpened(user)).then((m) => m.react('<:lock_savage:856224681136226314>'));
-        reaction.message.channel.setName(`ticket→${user.id}`);
+        reaction.message.channel.setName(`ticket→${reaction.message.channel.name.replace('fechado→', '')}`);
         client.channels.cache.get('757709253766283294').send(TicketLog(user, 'Aberto', reaction.message.channel.name));
     },
     '856212830969659412'(reaction, user, client) {
@@ -42,11 +42,11 @@ const Reactions = {
         reaction.message.channel.send(TicketSaved(user));
         client.channels.cache.get('757709253766283294').send(TicketLog(user, 'Salvo', reaction.message.channel.name));
     },
-    '856222528997556244'(reaction, user, client) {
+    async '856222528997556244'(reaction, user, client) {
         //delete
         if (user.id !== '323281577956081665') return; //Mack
         reaction.message.channel.send(TicketDeleting(user));
-        reaction.message.channel.setName(`deletando→${user.id}`);
+        reaction.message.channel.setName(`deletando→${reaction.message.channel.name.replace('fechado→', '')}`);
         setTimeout(() => {
             reaction.message.channel.delete();
         }, 5000);

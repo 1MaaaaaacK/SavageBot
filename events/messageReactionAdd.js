@@ -7,7 +7,7 @@ module.exports = {
     name: 'messageReactionAdd',
     once: 'on',
     async execute(reaction, user, client) {
-         if (reaction.partial) {
+        if (reaction.partial) {
             await reaction.fetch();
         }
         if (user.bot == true || reaction.message.author.bot == false) return;
@@ -29,6 +29,6 @@ module.exports = {
             await setEmoji(reaction, user, client);
         } else if (reaction.message.channel.id === '839706805104803860' && reaction._emoji.id == '856226635694342164') {
             return FormCreate(client, reaction, user), reaction.users.remove(user.id);
-        } 
+        }
     },
 };

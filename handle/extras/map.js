@@ -1,9 +1,12 @@
 const Discord = require('discord.js');
 const { query } = require('gamedig');
+const { webhookIpServidores, webhookPlayersTotal } = require('../../configs/config_webhook');
+const webhookIpServidoresSend = new Discord.WebhookClient(webhookIpServidores.id, webhookIpServidores.token);
+const webhookPlayersTotalSend = new Discord.WebhookClient(webhookPlayersTotal.id, webhookPlayersTotal.token);
 
 var Catch = [];
 
-async function mapUpdate(message, client, once, msg1, msg2) {
+async function mapUpdate() {
     const servers = [
         (jailbreak = {
             host: '131.196.196.197',
@@ -28,6 +31,10 @@ async function mapUpdate(message, client, once, msg1, msg2) {
         (mix4fun = {
             host: '131.196.196.197',
             port: '27190',
+        }),
+        (arena = {
+            host: '131.196.196.197',
+            port: '27260',
         }),
         (surf = {
             host: '131.196.196.197',
@@ -110,24 +117,22 @@ async function mapUpdate(message, client, once, msg1, msg2) {
             );
         }
     }
-    
-    if (once) {
-        once = false
-        await message.channel.send(EmbedImg);
-        msg1 = await message.channel.send(Embed);
-        msg2 = await message.channel.send(Embed2);
-    } else {
-        msg1.edit(Embed);
-        msg2.edit(Embed2);
-    }
-
+    await webhookIpServidoresSend.send({
+        username: 'SavageServidores',
+        avatarURL: 'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
+        embeds: [EmbedImg, Embed, Embed2],
+    });
     let Embed4 = new Discord.MessageEmbed()
         .setColor('#5F40C1')
         .setTitle('Players Online')
         .setTimestamp()
         .setDescription(`\`\`\`${contPlayers}/${contPlayersTotal}\`\`\``);
 
-    await client.channels.cache.get('825124273655250984').send(Embed4);
+    await webhookPlayersTotalSend.send({
+        username: 'SavageServidores',
+        avatarURL: 'https://cdn.discordapp.com/attachments/751428595536363610/795505830845743124/savage.png',
+        embeds: [Embed4],
+    });
 }
 module.exports = {
     mapUpdate,

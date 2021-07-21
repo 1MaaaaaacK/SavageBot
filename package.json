@@ -10,7 +10,8 @@
     "jsdom": "^16.6.0",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
-    "pterodactyl.js": "^2.1.1"
+    "pterodactyl.js": "^2.1.1",
+    "steamid": "^1.1.3"
   },
   "devDependencies": {
     "prettier": "^2.2.1"

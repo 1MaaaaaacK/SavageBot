@@ -39,7 +39,7 @@ exports.FormCreate = async function (client, reaction, user) {
                     allow: ['VIEW_CHANNEL'],
                 },
             ],
-            parent: '841003382521069590',
+            parent: '865016939126849567',
         })
         .then(async (channel) => {
             await channel.send(`${user}`);
