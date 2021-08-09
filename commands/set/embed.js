@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-exports.MackNotTarget = function (message) {
+exports.NotTarget = function (message) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, você não pode ter o 1Mack como alvo !`
+            `<a:warning_savage:856210165338603531> ${message.author}, você não pode ter o 1Mack como alvo/não pode setar Fundador, Diretor e Gerente!`
         );
     return embed;
 };
@@ -18,7 +18,7 @@ exports.WorngTime = function (message) {
 exports.logVip = function (fetchedUser, discord1, steamid, DataInicialUTC, DataFinalUTC, cargo, valor, extra, message) {
     const embed = new Discord.MessageEmbed()
         .setColor('#0099ff')
-        .setTitle(`${fetchedUser.user.username}`)
+        .setTitle(`${fetchedUser.username}`)
         .addFields(
             { name: 'discord', value: discord1 },
             { name: 'Steamid', value: steamid },
@@ -60,7 +60,7 @@ exports.SetSuccess = function (message, fetchedUser, cargo) {
     const embed = new Discord.MessageEmbed()
         .setColor('#00ff00')
         .setDescription(
-            `<a:right_savage:856211226300121098> ${message.author}, O **${fetchedUser.user.username}** foi setado com o cargo **${cargo}** in-game com sucesso !`
+            `<a:right_savage:856211226300121098> ${message.author}, O **${fetchedUser.username}** foi setado com o cargo **${cargo}** in-game com sucesso !`
         );
     return embed;
 };

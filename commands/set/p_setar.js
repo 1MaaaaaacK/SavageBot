@@ -3,7 +3,7 @@ const { panelApiKey } = require('../../configs/config_privateInfos');
 const { serversInfos } = require('../../configs/config_geral');
 const { cargosCertos } = require('../../configs/config_geral');
 const { connection } = require('../../configs/config_privateInfos');
-const { MackNotTarget, WorngTime, AskQuestion, SetSuccess, vipSendMSG, logVip } = require('./embed');
+const { NotTarget, WorngTime, AskQuestion, SetSuccess, vipSendMSG, logVip } = require('./embed');
 const {
     GerenteError,
     WrongRole,
@@ -38,10 +38,12 @@ module.exports = {
         }
 
         if (
-            (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554') &&
+            steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554' || ['fundador', 'diretor', 'gerente'].includes(cargo) &&
             message.author.id !== '323281577956081665'
         )
-            return message.channel.send(MackNotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
+            return message.channel.send(NotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
+        
+        
 
         tempo = parseInt(tempo);
 
@@ -221,15 +223,15 @@ module.exports = {
             } catch {}
         }
 
-        message.channel.send(SetSuccess(message, fetchedUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
+        message.channel.send(SetSuccess(message, fetchUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
 
         if (isVip == false) {
             message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagComprado, '722814929056563260']);
-            message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchedUser.user.username);
+            message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchUser.username);
         } else {
             message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagVip, '753728995849142364']);
         }
-        canal.send(logVip(fetchedUser, discord1, steamid, DataInicialUTC, DataFinalUTC, cargo, valor, extra, message));
+        canal.send(logVip(fetchUser, discord1, steamid, DataInicialUTC, DataFinalUTC, cargo, valor, extra, message));
         fetchUser.send(vipSendMSG(fetchUser, cargo, tempo, servidor));
     },
 };

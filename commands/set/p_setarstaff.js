@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const { panelApiKey, connection } = require('../../configs/config_privateInfos');
 const { serversInfos, cargosCertos } = require('../../configs/config_geral');
 
-const { MackNotTarget, WorngTime, AskQuestion, SetSuccess, isDono, staffSendAllMSG } = require('./embed');
+const { NotTarget, WorngTime, AskQuestion, SetSuccess, isDono, staffSendAllMSG } = require('./embed');
 const { WrongRole, PlayerDiscordNotFound, WrongServer, InternalServerError } = require('../../embed/geral');
 const chalk = require('chalk');
 
@@ -32,10 +32,10 @@ module.exports = {
         }
 
         if (
-            (steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554') &&
+            steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554' || ['fundador', 'diretor', 'gerente'].includes(cargo) &&
             message.author.id !== '323281577956081665'
         )
-            return message.channel.send(MackNotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
+            return message.channel.send(NotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
 
         if (cargosCertos.find((m) => m == cargo) == undefined || cargo == 'vip')
             return message.channel
@@ -61,7 +61,7 @@ module.exports = {
 
         let logStaff = new Discord.MessageEmbed()
             .setColor('#0099ff')
-            .setTitle(`${fetchedUser.user.username}`)
+            .setTitle(`${fetchUser.username}`)
             .addFields(
                 { name: 'discord', value: discord1 },
                 { name: 'Steamid', value: steamid },
@@ -128,12 +128,12 @@ module.exports = {
         dataInicial = Math.floor(dataInicial / 1000);
 
         let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString('en-GB');
-
+        
         try {
             if (opa === 's') {
                 await con.query(
                     `update vip_sets set
-            name = '${fetchedUser.username}',
+            name = '${fetchUser.username}',
             steamid = '${steamid}',
             discord_id = '${usuarioId}', 
             cargo = '${cargo}', 
@@ -146,7 +146,7 @@ module.exports = {
             } else if (opa === undefined) {
                 await con.query(
                     `insert into vip_sets(name, steamid, discord_id, cargo, date_create, date_final, isVip, valor, server_id) 
-                SELECT '${fetchedUser.username}', '${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '', '0', '', 
+                SELECT '${fetchUser.username}', '${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '', '0', '', 
                 vip_servers.id FROM vip_servers WHERE server_name = '${servidor}'`
                 );
             } else return opa;
@@ -204,11 +204,11 @@ module.exports = {
             } catch {}
         }
 
-        message.channel.send(SetSuccess(message, fetchedUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
+        message.channel.send(SetSuccess(message, fetchUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
         try {
             message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagDoCargo, '722814929056563260']);
             message.guild.members.cache.get(usuarioId).roles.remove('818257971133808660');
-            message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchedUser.user.username);
+            message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchUser.username);
         } catch (error) {
             message.channel
                 .send(`${message.author} **| Não consegui setar o cargo/Renomear o player, faça isso manualmente!!**`)

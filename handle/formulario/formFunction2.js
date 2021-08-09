@@ -96,9 +96,7 @@ async function formFunction2(user, channel, client, resultForm1Check) {
         ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
         <a:savage_7:839199778364457013> → Surf
         ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-        <a:savage_8:839199778516500510> → TTT
-        ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-        <a:savage_9:839199778494480394> → MiniGame
+        <a:savage_8:839199778516500510> → Arena
         ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
 
         **Você tem 50 segundos para responder a essa pergunta!**
@@ -131,10 +129,7 @@ async function formFunction2(user, channel, client, resultForm1Check) {
                         serverescolhido = 'surf';
                         break;
                     case '8':
-                        serverescolhido = 'ttt';
-                        break;
-                    case '9':
-                        serverescolhido = 'mg';
+                        serverescolhido = 'arena';
                         break;
                     default:
                         break;
