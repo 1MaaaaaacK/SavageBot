@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
+const wait = require('util').promisify(setTimeout);
 const { connection } = require('../../configs/config_privateInfos');
 const { serversInfos } = require('../../configs/config_geral');
-const { WrongServer, GerenteError, PlayerDiscordNotFound } = require('../../embed/geral');
+const { GerenteError, PlayerDiscordNotFound } = require('../../embed/geral');
 const {
     FormAlreadyOpened,
     FormCompleted,
@@ -15,43 +16,42 @@ const {
 module.exports = {
     name: 'verform',
     description: 'Ver os formulários',
-    usage: 'servidor',
-    cooldown: 15,
-    permissions: ['711022747081506826'], //Perm ban
-    args: 1,
-    async execute(client, message, args) {
-        let servidor = String(args[0]).toLowerCase();
+    options: [
+        {name: 'servidor', type: 3, description: 'Escolha um servidor', required: true, choices: serversInfos.map(m => { return {name: m.name, value: m.name}})}
+    ],
+    default_permission: false,
+    cooldown: 0,
+    permissions: [{id: '711022747081506826', type: 1, permission: true}], //Gerente
+    async execute(client, interaction) {
+        let servidor = interaction.options.getString('servidor')
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
-        if (serversInfosFound == undefined)
-            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
-
-        if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
+        if (!interaction.member._roles.find(m => m == serversInfosFound.gerenteRole))
+        return interaction.reply({embeds: [GerenteError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         const con = connection.promise();
 
-        let canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${message.author.id}`);
+        let canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${interaction.user.id}`);
 
         if (canalCheck === undefined) {
-            await message.guild.channels.create(`verform${servidor}→${message.author.id}`, {
+            await interaction.guild.channels.create(`verform${servidor}→${interaction.user.id}`, {
                 type: 'text',
                 permissionOverwrites: [
                     {
-                        id: message.guild.roles.everyone,
+                        id: interaction.guild.roles.everyone,
                         deny: ['VIEW_CHANNEL'],
                     },
                     {
-                        id: message.author.id,
+                        id: interaction.user.id,
                         allow: ['VIEW_CHANNEL'],
                     },
                 ],
                 parent: '818261624317149235',
             });
-            canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${message.author.id}`);
+            canalCheck = client.channels.cache.find((m) => m.name === `verform${servidor}→${interaction.user.id}`);
         } else {
-            return message.channel.send(FormAlreadyOpened(message)).then((m) => m.delete({ timeout: 10000 }));
+            return interaction.reply({embeds: [FormAlreadyOpened(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
         }
 
         let guild = client.guilds.cache.get('792575394271592458');
@@ -63,9 +63,9 @@ module.exports = {
 
         canal = await canal.map((m) => m);
         if (canal == undefined) {
-            return message.channel.send(FormCompleted(message)).then((m) => m.delete({ timeout: 7000 }));
+            return interaction.reply({embeds: [FormCompleted(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
         }
-        message.channel.send(FormCreated(message, canalCheck)).then((m) => m.delete({ timeout: 5000 }));
+        interaction.reply({embeds: [FormCreated(interaction, canalCheck)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         for (let x in canal) {
             let canalAwait = canalCheck;
@@ -82,7 +82,7 @@ module.exports = {
 
             if (result == '') {
                 let logNotResult = await guild.channels.cache.find((channel) => channel.id == '843580489800745011');
-                logNotResult.send(`**${discord_id}** estava sem respostas no form de **${servidor}**!`);
+                logNotResult.send({content: `**${discord_id}** estava sem respostas no form de **${servidor}**!`});
                 canal[x].delete();
                 continue;
             }
@@ -135,21 +135,21 @@ module.exports = {
                 }
             }
 
-            await canalAwait.send(formMessage);
+            await canalAwait.send({embeds: [formMessage]});
             if (formMessage2.fields != '') {
-                await canalAwait.send(formMessage2);
+                await canalAwait.send({embeds: [formMessage2]});
             }
             if (formMessage3.fields != '') {
-                await canalAwait.send(formMessage3);
+                await canalAwait.send({embeds: [formMessage3]});
             }
 
             const filter = (f) =>
-                (f.author == message.author && f.content.toLowerCase() === 'aprovado') ||
+                f.author == interaction.user && (f.content.toLowerCase() === 'aprovado' ||
                 f.content.toLowerCase() === 'reprovado' ||
-                f.content.toLowerCase() === 'proximo';
+                f.content.toLowerCase() === 'proximo');
 
             await canalAwait
-                .awaitMessages(filter, { max: 1, time: 1000000, errors: ['time'] })
+                .awaitMessages({ filter, max: 1, time: 1000000, errors: ['time'] })
                 .then(async (collected) => {
                     collected = collected.first();
                     collected = collected.content.toLowerCase();
@@ -160,15 +160,17 @@ module.exports = {
                         try {
                             var fetchUser = await client.users.fetch(discord_id);
                         } catch (error) {
-                            message.channel
-                                .send(PlayerDiscordNotFound(message))
-                                .then((m) => m.delete({ timeout: 12000 }));
+                            canalAwait.send({embeds: [PlayerDiscordNotFound(interaction)]})
+                                .then(async (m) => {
+                                    await wait(5000)
+                                    await m.delete()
+                                });
                         }
                         canal[x].delete();
 
                         await con.query(`delete from form_respostas_2Etapa where discord_id = ${discord_id}`);
 
-                        fetchUser.send(LogReprovado(fetchUser));
+                        fetchUser.send({embeds: [LogReprovado(fetchUser)]});
                     } else {
                         try {
                             var fetchUser = await client.users.fetch(discord_id);
@@ -176,36 +178,37 @@ module.exports = {
                                 .get('343532544559546368')
                                 .members.fetch(fetchUser);
                         } catch (error) {
-                            return message.channel
-                                .send(PlayerDiscordNotFound(message))
-                                .then((m) => m.delete({ timeout: 12000 }));
+                            return canalAwait.send({embeds: [PlayerDiscordNotFound(interaction)]})
+                                .then(async (m) => {
+                                    await wait(5000)
+                                    await m.delete()
+                                });
                         }
-                        message.guild.members.cache.get(discord_id).roles.add('818257971133808660');
+                        interaction.guild.members.cache.get(discord_id).roles.add('818257971133808660');
 
-                        fetchUser.send(LogAprovado(fetchUser));
-                        client.channels.cache.get('848364797975068682').send(LogAprovadoChannel(fetchUser, result));
+                        fetchUser.send({embeds: [LogAprovado(fetchUser)]});
+                        client.channels.cache.get('848364797975068682').send({embeds: [LogAprovadoChannel(fetchUser, result)]});
 
                         let canalLogInfo = await guild.channels.cache.find(
                             (channel) => channel.name == servidor && channel.parentID == '842203130208321557'
                         );
-                        await canalLogInfo.send(logInfos(fetchUser, result));
+                        await canalLogInfo.send({embeds: [logInfos(fetchUser, result)]});
 
                         canal[x].delete();
 
                         await con.query(`delete from form_respostas_2Etapa where discord_id = ${discord_id}`);
                     }
                 })
-                .catch(() => {
+                .catch(async () => {
                     return (
-                        canalAwait.send(`${message.author} **| Você não respondeu a tempo....Deletando Canal**`),
-                        setTimeout(async function () {
-                            canalAwait.delete();
-                        }, 6000)
+                        await canalAwait.send({content: `${interaction.user} **| Você não respondeu a tempo....Deletando Canal**`}),
+                        await wait(6000),
+                        await canalAwait.delete()
                     );
                 });
         }
 
-        await canalCheck.send(FormCompleted(message));
+        await canalCheck.send({embeds: [FormCompleted(interaction)]});
         setTimeout(async function () {
             canalCheck.delete();
         }, 6000);

@@ -1,41 +1,41 @@
 const Discord = require('discord.js');
 
-exports.MackNotTarget = function (message) {
+exports.MackNotTarget = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
-        .setDescription(`<a:warning_savage:856210165338603531> ${message.author}, você não pode ter o 1Mack como alvo !`);
+        .setDescription(`<a:warning_savage:856210165338603531> ${interaction.user}, você não pode ter o 1Mack como alvo !`);
     return embed;
 };
 
-exports.SteamidNotFound = function (message, servidor) {
+exports.SteamidNotFound = function (interaction, servidor) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
-        .setDescription(`<a:warning_savage:856210165338603531> ${message.author}, não encontrei ninguém com essa steamid no servidor ${servidor}!`);
+        .setDescription(`<a:warning_savage:856210165338603531> ${interaction.user}, não encontrei ninguém com essa steamid no servidor ${servidor}!`);
     return embed;
 };
 
-exports.PlayerDiscordRoleNotFound = function (message) {
+exports.PlayerDiscordRoleNotFound = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, não achei o discord desse player, você terá que remover o cargo dele do discord manualmente !`
+            `<a:warning_savage:856210165338603531> ${interaction.user}, não achei o discord desse player, você terá que remover o cargo dele do discord manualmente !`
         );
     return embed;
 };
 
-exports.DemotedLog = function (fetchUser, steamid, extra, message) {
+exports.DemotedLog = function (fetchUser, steamid, extra, interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#0099ff')
         .setTitle(fetchUser.username)
         .addFields(
             {
                 name: 'discord',
-                value: fetchUser,
+                value: `${fetchUser}`,
             },
             { name: 'Steamid', value: steamid },
             { name: 'Observações', value: extra }
         )
-        .setFooter(`Demotado Pelo ${message.author.username}`);
+        .setFooter(`Demotado Pelo ${interaction.user.username}`);
     return embed;
 };
 exports.DemotedSendMSG = function (fetchUser, steamid, servidor, extra) {
@@ -53,11 +53,11 @@ exports.DemotedSendMSG = function (fetchUser, steamid, servidor, extra) {
     return embed;
 };
 
-exports.DemotedAskConfirm = function (message, rows) {
+exports.DemotedAskConfirm = function (interaction, rows) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ffff00')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author} Tem certeza que quer fazer isso ? \n\n**Eu achei ${rows.length} player com essa SteamID** \n\`\`\`Digite SIM ou NÃO\`\`\``
+            `<a:warning_savage:856210165338603531> ${interaction.user} Tem certeza que quer fazer isso ? \n\n**Eu achei ${rows.length} player com essa SteamID** \n\`\`\`Digite SIM ou NÃO\`\`\``
         );
     return embed;
 };

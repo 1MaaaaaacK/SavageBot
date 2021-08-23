@@ -2,35 +2,40 @@ const { WrongNumber, MissingPermission, OldMessage } = require('./embed');
 module.exports = {
     name: 'limpar',
     description: 'Limpar chat excluindo mensagens',
-    usage: 'quantidade - apagar msg de bot?(Responda sim caso queira pagar! Se não quiser, basta deixar em branco)',
+    options:[
+        {name: 'quantidade', type: 4, description: 'Quantidade de msgs a serem excluídas (>1<99)', required: true, choices: null},
+        {name: 'botmsg', type: 5, description: 'Limpar mensagem de bot também?', required: false, choices: null},
+    ],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826'], //gerente
-    args: 1,
-    async execute(client, message, args) {
-        let quantidade = Number(args[0]),
-            includeBot = String(args[1]).toLowerCase();
+    permissions: [{id: '711022747081506826', type: 1, permission: true}],//Gerente
+    async execute(client, interaction) {
+        let quantidade = interaction.options.getInteger('quantidade'),
+            botMsg = interaction.options.getBoolean('botmsg')
 
         if (quantidade > 99 || quantidade < 1)
-            return message.channel.send(WrongNumber(message)).then((m) => m.delete({ timeout: 6000 }));
-        if (includeBot == 'sim' || includeBot == 's') {
-            if (message.member.roles.cache.has('603318536798077030')) {
-                includeBot = true;
+
+            return interaction.reply({embeds: [WrongNumber(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
+
+        if (botMsg) {
+            if (interaction.member.roles.cache.has('603318536798077030')) {
+                botMsg = true;
             } else {
-                includeBot = false;
-                await message.channel.send(MissingPermission(message));
+                botMsg = false;
+                await interaction.reply({embeds: [MissingPermission(interaction)]});
             }
         } else {
-            includeBot = false;
+            botMsg = false;
         }
         let date = Date.now();
         quantidade += 1;
-        message.channel.messages.fetch({ limit: quantidade }).then((m) => {
+        interaction.channel.messages.fetch({ limit: quantidade }).then((m) => {
             let messagesFound = [],
                 messagesMoreThan14 = [];
 
             m.forEach(function (element) {
                 if (Math.round(Math.abs(date - element.createdTimestamp)) / (1000 * 60 * 60 * 24) < 14) {
-                    if (includeBot == false) {
+                    if (botMsg == false) {
                         if (!element.author.bot) {
                             messagesFound.push(element);
                         }
@@ -42,15 +47,13 @@ module.exports = {
                 }
             });
             if (messagesFound == '') {
-                return message.channel
-                    .send('**Eu não achei nenhuma mensagem que eu possa excluir!!**')
-                    .then((m) => m.delete({ timeout: 4000 }));
+                return interaction.reply({content: '**Não achei nenhuma mensagem que eu possa excluir!!**'})
+                    .then(() => setTimeout(() => interaction.deleteReply(), 10000));
             }
 
             try {
-                message.channel.bulkDelete(messagesFound).then((messages) => {
-                    message.channel
-                        .send(
+                interaction.channel.bulkDelete(messagesFound).then((messages) => {
+                    interaction.reply({content:
                             `Deletei ${
                                 messages.size > 2
                                     ? `**${messages.size - 1}** mensagens`
@@ -60,11 +63,13 @@ module.exports = {
                                     ? ` e **Não consegui deletar ${messagesMoreThan14.length}** mensagens, pois tem mais de 14 dias que elas foram mandadas`
                                     : ''
                             }`
-                        )
-                        .then((m) => m.delete({ timeout: 10000 }));
+                        })
+                        .then(() => setTimeout(() => interaction.deleteReply(), 10000));
                 });
             } catch (err) {
-                return message.channel.send(OldMessage(message)).then((z) => z.delete({ timeout: 7000 }));
+                return interaction.reply({embeds: [OldMessage(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000))
+                ||
+                interaction.editReply({embeds: [OldMessage(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000))
             }
         });
     },

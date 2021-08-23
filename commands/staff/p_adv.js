@@ -1,18 +1,20 @@
-const { LogAdv, AvdSuccess } = require('./embed');
+const { LogAdv, AdvSuccess, AdvWarning } = require('./embed');
 
 module.exports = {
     name: 'adv',
     description: 'Aplicar advertência em um staff',
-    usage: '@ do Player - motivo',
+    options: [
+        {name: 'discord', type: 6, description: 'discord do player', required: true, choices: null},
+        {name: 'motivo', type: 3, description: 'Motivo da AVD', required: true, choices: null}
+    ],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826', '831219575588388915'], // Gerente
-    args: 2,
-    async execute(client, message, args) {
-        let discord = args[0],
-            reason = args[1];
+    permissions: [{id: '711022747081506826', type: 1, permission: true}, {id: '831219575588388915', type: 1, permission: true}],
+    async execute(client, interaction) {
+        let discord1 = interaction.options.getUser('discord'),
+            reason = interaction.options.getString('motivo'),
+            userCatch = client.guilds.cache.get('343532544559546368').members.cache.get(discord1.id);
 
-        const usuarioId = discord.slice(0, -1).substring(3),
-            userCatch = client.guilds.cache.get('343532544559546368').members.cache.get(usuarioId);
         let adv;
 
         if (
@@ -27,14 +29,14 @@ module.exports = {
         ) {
             return client.channels.cache
                 .get('751428595536363610')
-                .send(message.channel.send(ADVaviso(message, usuarioId)));
+                .send(interaction.reply({embeds: [AdvWarning(interaction, discord1)]}));
         } else {
             userCatch.roles.add('607704708051894272');
             adv = '2';
         }
 
-        message.channel.send(AvdSuccess(message)).then((m) => m.delete({ timeout: 5000 }));
+        interaction.reply({embeds: [AdvSuccess(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
-        client.channels.cache.get('779013964138414090').send(LogAdv(discord, adv, reason, message));
+        client.channels.cache.get('779013964138414090').send({embeds: [LogAdv(discord1, adv, reason, interaction)]});
     },
 };

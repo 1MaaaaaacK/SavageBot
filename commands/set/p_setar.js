@@ -1,14 +1,11 @@
 const fetch = require('node-fetch');
 const { panelApiKey } = require('../../configs/config_privateInfos');
-const { serversInfos } = require('../../configs/config_geral');
-const { cargosCertos } = require('../../configs/config_geral');
+const { serversInfos, paidRoles } = require('../../configs/config_geral');
 const { connection } = require('../../configs/config_privateInfos');
-const { NotTarget, WorngTime, AskQuestion, SetSuccess, vipSendMSG, logVip } = require('./embed');
+const { NotTarget, AskQuestion, SetSuccess, vipSendMSG, logVip } = require('./embed');
 const {
     GerenteError,
-    WrongRole,
     PlayerDiscordNotFound,
-    WrongServer,
     InternalServerError,
 } = require('../../embed/geral');
 const chalk = require('chalk');
@@ -16,55 +13,46 @@ const chalk = require('chalk');
 module.exports = {
     name: 'setar',
     description: 'Setar um cargo comprado para algum player',
-    usage: '@ do Player - steamid - cargo - tempo em dias - valor - servidor - observações',
+    options: [
+        {name: 'discord', type: 6, description: 'discord do player', required: true, choices: null},
+        {name: 'steamid', type: 3, description: 'Steamid do player', required: true, choices: null},
+        {name: 'cargo', type: 3, description: 'Escolha um cargo para o Set', required: true, choices: paidRoles.map(m => { return {name: m, value: m}})},
+        {name: 'tempo', type: 4, description: 'Tempo em dias do set', required: true, choices: null},
+        {name: 'valor', type: 10, description: 'Valor pago pelo player', required: true, choices: null},
+        {name: 'servidor', type: 3, description: 'Escolha um Servidor para o Set', required: true, choices: serversInfos.map(m => { return {name: m.name, value: m.name}})},
+        {name: 'observações', type: 3, description: 'Observações sobre o set', required: true, choices: null}
+    ],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826', '831219575588388915'], // Gerente
-    args: 7,
-    async execute(client, message, args) {
-        let discord1 = String(args[0]),
-            steamid = String(args[1]),
-            cargo = String(args[2]).toLowerCase(),
-            tempo = args[3],
-            valor = args[4],
-            servidor = String(args[5]).toLowerCase(),
-            extra = String(args[6]);
+    permissions: [{id: '711022747081506826', type: 1, permission: true}, {id: '831219575588388915', type: 1, permission: true}], // Gerente
+    async execute(client, interaction) {
+        let discord1 = interaction.options.getUser('discord'),
+        steamid = interaction.options.getString('steamid'),
+        cargo = interaction.options.getString('cargo').toLowerCase(),
+        tempo = interaction.options.getInteger('tempo'),
+        valor = interaction.options.getNumber('valor'),
+        servidor = interaction.options.getString('servidor').toLowerCase(),
+        extra = interaction.options.getString('observações');
 
-        if (!extra) {
-            extra = 'Inexistentes';
-        }
+        await interaction.deferReply()
 
-        if (steamid !== undefined && steamid.startsWith('STEAM_0')) {
+        try{
+        if (steamid.startsWith('STEAM_0')) {
             steamid = steamid.replace('0', '1');
         }
 
-        if (
-            steamid == 'STEAM_1:1:79461554' || steamid == 'STEAM_0:1:79461554' || ['fundador', 'diretor', 'gerente'].includes(cargo) &&
-            message.author.id !== '323281577956081665'
-        )
-            return message.channel.send(NotTarget(message)).then((m) => m.delete({ timeout: 15000 }));
+        if (steamid == 'STEAM_1:1:79461554' && message.author.id !== '323281577956081665')
         
+            return interaction.followUp({embeds: [NotTarget(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
         
-
-        tempo = parseInt(tempo);
-
-        if ((!isNaN(tempo) && Number.isInteger(tempo)) == false)
-            return message.channel.send(WorngTime(message)).then((m) => m.delete({ timeout: 15000 }));
-
-        if (cargosCertos.find((m) => m == cargo) == undefined)
-            return message.channel
-                .send(WrongRole(message, cargosCertos, false))
-                .then((m) => m.delete({ timeout: 15000 }));
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
-        if (serversInfosFound == undefined)
-            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
-
         if (
-            !message.member.roles.cache.has(serversInfosFound.gerenteRole) &&
-            !message.member.roles.cache.has('831219575588388915')
+            !interaction.member._roles.find(m => m == serversInfosFound.gerenteRole) &&
+            !interaction.member._roles.find(m => m == '831219575588388915')
         )
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
+            return interaction.followUp({embeds: [GerenteError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         let dataInicial = Date.now();
         dataInicial = Math.floor(dataInicial / 1000);
@@ -77,19 +65,19 @@ module.exports = {
         }
         let DataInicialUTC = new Date(dataInicial * 1000).toLocaleDateString('en-GB');
 
-        const usuarioId = discord1.slice(0, -1).substring(3);
 
+        let fetchUser, fetchedUser
         try {
-            var fetchUser = await client.users.fetch(usuarioId);
-            var fetchedUser = await client.guilds.cache.get('343532544559546368').members.fetch(fetchUser);
+             fetchUser = await client.users.fetch(discord1.id);
+             fetchedUser = await client.guilds.cache.get('343532544559546368').members.fetch(fetchUser);
         } catch (error) {
-            return message.channel.send(PlayerDiscordNotFound(message)).then((m) => m.delete({ timeout: 12000 }));
+            return interaction.followUp({embeds: [PlayerDiscordNotFound(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
         }
 
         let guild = client.guilds.cache.get('792575394271592458');
 
         const canal = guild.channels.cache.find(
-            (channel) => channel.name === serversInfosFound.canalAlvo && channel.parentID == '792575394271592459'
+            (channel) => channel.name === serversInfosFound.canalAlvo && channel.parentId == '792575394271592459'
         );
 
         let isVip = false;
@@ -109,7 +97,7 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
+                interaction.followUp({embeds: [InternalServerError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
@@ -117,30 +105,30 @@ module.exports = {
         let opa;
 
         if (rows != '') {
-            await message.channel.send(AskQuestion(message)).then(async (m) => {
-                m.delete({ timeout: 15000 });
-                let filter = (m) => m.author.id === message.author.id;
+            await interaction.followUp({embeds: [AskQuestion(interaction)]}).then(async (m) => {
+                
+                let filter = (m) => m.author === interaction.user && ['s', 'sim', 'n', 'nao'].includes(m.content.toLowerCase());
+
                 await m.channel
-                    .awaitMessages(filter, {
+                    .awaitMessages({
+                        filter, 
                         max: 1,
                         time: 15000,
                         errors: ['time'],
                     })
                     .then((message) => {
                         message = message.first();
-                        message.delete({ timeout: 1000 });
-                        if (message.content.toUpperCase() == 'NAO' || message.content.toUpperCase() == 'N') {
-                            return (opa = message.channel
-                                .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                                .then((m) => m.delete({ timeout: 5000 })));
-                        } else if (message.content.toUpperCase() == 'SIM' || message.content.toUpperCase() == 'S') {
+                        message.delete();
+                        if (message.content.toLowerCase() == 'nao' || message.content.toLowerCase() == 'n') {
+                            return (opa = interaction.editReply({content: '**Abortando Comando** <a:savage_loading:837104765338910730>', embeds: []})
+                                .then(() => setTimeout(() => interaction.deleteReply(), 10000)));
+                        } else if (message.content.toLowerCase() == 'sim' || message.content.toLowerCase() == 's') {
                             return (opa = 's');
                         }
                     })
                     .catch((err) => {
-                        return (opa = message.channel
-                            .send('**Abortando Comando** <a:savage_loading:837104765338910730>')
-                            .then((m) => m.delete({ timeout: 5000 })));
+                        return (opa = interaction.editReply({content: '**Abortando Comando** <a:savage_loading:837104765338910730>', embeds: []})
+                            .then(() => setTimeout(() => interaction.deleteReply(), 10000)), console.log(err))
                     });
             });
         }
@@ -150,24 +138,24 @@ module.exports = {
                 await con.query(
                     `update vip_sets set name = '${fetchUser.username}',
             steamid = '${steamid}',
-            discord_id = '${usuarioId}', 
+            discord_id = '${discord1.id}', 
             cargo = '${cargo}', 
             date_create = '${DataInicialUTC}', 
             date_final = '${DataFinalUTC}', 
             isVip = '1', 
             valor = '${valor}'
-            WHERE (steamid='${steamid}' OR discord_id='${usuarioId}') AND vip_sets.server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
+            WHERE (steamid='${steamid}' OR discord_id='${discord1.id}') AND vip_sets.server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
                 );
             } else if (opa === undefined) {
                 await con.query(
                     `insert into vip_sets(name, steamid, discord_id, cargo, date_create, date_final, isVip, valor, server_id) 
-                SELECT '${fetchUser.username}' ,'${steamid}', '${usuarioId}', '${cargo}', '${DataInicialUTC}', '${DataFinalUTC}', '1', '${valor}', 
+                SELECT '${fetchUser.username}' ,'${steamid}', '${discord1.id}', '${cargo}', '${DataInicialUTC}', '${DataFinalUTC}', '1', '${valor}', 
                 vip_servers.id FROM vip_servers WHERE server_name = '${servidor}'`
                 );
             } else return opa;
         } catch (error) {
             return (
-                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
+                interaction.editReply({embeds: [InternalServerError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)),
                 console.error(chalk.redBright('Erro no Insert'), error)
             );
         }
@@ -205,7 +193,7 @@ module.exports = {
                 );
             } catch (error) {
                 return (
-                    message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 7000 })),
+                    interaction.editReply({embeds: [InternalServerError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)),
                     console.error(chalk.redBright('Erro na Setagem'), error)
                 );
             }
@@ -223,15 +211,41 @@ module.exports = {
             } catch {}
         }
 
-        message.channel.send(SetSuccess(message, fetchUser, cargo)).then((m) => m.delete({ timeout: 5000 }));
+        interaction.editReply({embeds: [SetSuccess(interaction, fetchUser, cargo)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)) 
+        ||
+        interaction.followUp({embeds: [SetSuccess(interaction, fetchUser, cargo)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)) 
 
-        if (isVip == false) {
-            message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagComprado, '722814929056563260']);
-            message.guild.members.cache.get(usuarioId).setNickname('Savage | ' + fetchUser.username);
-        } else {
-            message.guild.members.cache.get(usuarioId).roles.add([serversInfosFound.tagVip, '753728995849142364']);
-        }
-        canal.send(logVip(fetchUser, discord1, steamid, DataInicialUTC, DataFinalUTC, cargo, valor, extra, message));
-        fetchUser.send(vipSendMSG(fetchUser, cargo, tempo, servidor));
+        try {
+            if (isVip == false) {
+                
+                if(!fetchedUser.roles.cache.has(serversInfosFound.tagComprado)){
+                    fetchedUser.roles.add(serversInfosFound.tagComprado)
+                }
+                if(!fetchedUser.roles.cache.has('722814929056563260')){
+                    fetchedUser.roles.add('722814929056563260')
+                }
+
+                fetchedUser.setNickname('Savage | ' + fetchUser.username);
+
+            } else {
+                
+                if(!fetchedUser.roles.cache.has(serversInfosFound.tagVip)){
+                    fetchedUser.roles.add(serversInfosFound.tagVip)
+                }
+                if(!fetchedUser.roles.cache.has('753728995849142364')){
+                    fetchedUser.roles.add('753728995849142364')
+                }
+
+                fetchedUser.setNickname('VIP | ' + fetchUser.username);
+
+            }
+        } catch (error) {}
+        
+        canal.send({embeds: [logVip(fetchUser, discord1, steamid, DataInicialUTC, DataFinalUTC, cargo, valor, extra, interaction)]});
+        fetchUser.send({embeds: [vipSendMSG(fetchUser, cargo, tempo, servidor)]});
+    }catch(err){
+        console.log(err)
+        
+    }
     },
 };

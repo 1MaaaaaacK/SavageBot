@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { TicketLog } = require('./embed');
-exports.Save = async function (user, message, client) {
-    await message.channel.messages.fetch({ limit: 100 }).then(async (response) => {
+exports.Save = async function (interaction, client) {
+    await interaction.channel.messages.fetch({ limit: 100 }).then(async (response) => {
         let data = [];
         
         response.forEach((m) => {
@@ -47,6 +47,6 @@ exports.Save = async function (user, message, client) {
                 },
             ],
         });
-        client.channels.cache.get('757708996638408776').send(TicketLog(user, 'Salvo', message.channel.name));
+        client.channels.cache.get('757708996638408776').send({embeds: [TicketLog(interaction.user, 'Salvo', interaction.channel)]});
     });
 };

@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 const botConfig = {
     prefix: '',
     token: '',
+    applicationId:''
 };
 
 const panelApiKey = {

@@ -1,22 +1,22 @@
 const Discord = require('discord.js');
 
-exports.HoursNotFoundError = function (message) {
+exports.HoursNotFoundError = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Houve um erro ao procurar a hora desse player, provavelmente não existe esse servidor no sistema de horários !`
+            `<a:warning_savage:856210165338603531> ${interaction.user}, Houve um erro ao procurar a hora desse player, provavelmente não existe esse servidor no sistema de horários !`
         );
     return embed;
 };
 
-exports.StaffHoursNotFound = function (message) {
+exports.StaffHoursNotFound = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
-        .setDescription(`<a:warning_savage:856210165338603531> ${message.author}, não encontrei as horas desse staff !`);
+        .setDescription(`<a:warning_savage:856210165338603531> ${interaction.user}, não encontrei as horas desse staff !`);
     return embed;
 };
 
-exports.HorasLog = function (result, HourFormat, servidor, steamid, message) {
+exports.HorasLog = function (result, HourFormat, servidor, steamid, interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('36393f')
         .setTitle(result[0].name)
@@ -25,7 +25,7 @@ exports.HorasLog = function (result, HourFormat, servidor, steamid, message) {
             { name: '**Servidor**', value: servidor.toUpperCase() },
             { name: '**Steamid**', value: steamid }
         )
-        .setFooter(`Horas Requisitadas pelo ${message.author.username}`)
+        .setFooter(`Horas Requisitadas pelo ${interaction.user.username}`)
         .setTimestamp();
     return embed;
 };

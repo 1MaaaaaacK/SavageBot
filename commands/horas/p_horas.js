@@ -6,21 +6,23 @@ const { HorasLog, StaffHoursNotFound, HoursNotFoundError } = require('./embed');
 module.exports = {
     name: 'horas',
     description: 'Ver as horas in-game dos staffs',
-    usage: 'servidor - steamid',
+    options: [{name: 'servidor', type: 3, description: 'Escolha um Servidor', required: true, choices: serversInfos.map(m => { return {name: m.name, value: m.name}})},
+            {name: 'steamid', type: 3, description: 'Steamid do staff', required: true, choices: null}],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826'], // Gerente
-    args: 2,
-    async execute(client, message, args) {
-        let servidor = String(args[0]).toLowerCase(),
-            steamid = String(args[1]);
+    permissions: [{id: '711022747081506826', type: 1, permission: true}], // Gerente
+    async execute(client, interaction) {
+
+        let steamid = interaction.options.getString('steamid'),
+            servidor = interaction.options.getString('servidor').toLowerCase()
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 7000 }));
+            return interaction.reply({embeds: [WrongServer(interaction, serversInfos)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
-        if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
+        if (!interaction.member._roles.find(m => m == serversInfosFound.gerenteRole))
+            return interaction.reply({embeds: [GerenteError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         const con = connection.promise();
         let result;
@@ -28,7 +30,7 @@ module.exports = {
             [result] = await con.query(`SELECT * FROM watchdog_${servidor} WHERE auth like '%${steamid.slice(10)}'`);
 
             if (result == '') {
-                return message.channel.send(StaffHoursNotFound(message)).then((m) => m.delete({ timeout: 5000 }));
+                return interaction.reply({embeds: [StaffHoursNotFound(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
             }
 
             function HourFormat(duration) {
@@ -38,9 +40,9 @@ module.exports = {
                 return mins == 0 ? `${hrs} horas` : `${hrs} horas e ${mins} minutos`;
             }
 
-            message.channel.send(HorasLog(result, HourFormat, servidor, steamid, message));
+            interaction.reply({embeds: [HorasLog(result, HourFormat, servidor, steamid, interaction)]});
         } catch (error) {
-            message.channel.send(HoursNotFoundError(message)).then((m) => m.delete({ timeout: 5000 }));
+            interaction.reply({embeds: [HoursNotFoundError(interaction)]}).then((m) => setTimeout(() => interaction.deleteReply(), 10000));
             console.log(error);
         }
     },

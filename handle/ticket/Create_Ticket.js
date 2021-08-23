@@ -1,65 +1,56 @@
-const { HasAlreadyChannel, TicketStart, ChannelCreated, TicketServerOptions } = require('./embed');
+const { TicketStart, ChannelCreated, TicketServerOptions } = require('./embed');
 const { Options } = require('./Options_Ticket');
 const { serversInfos } = require('../../configs/config_geral');
-exports.TicketCreate = async function (client, reaction, user) {
-    const canalAwait = await client.channels.cache.find((m) => m.name === `ticket→${user.id}`);
-
-    if (canalAwait) {
-        return reaction.message.channel
-            .send(HasAlreadyChannel(user, canalAwait))
-            .then((m) => m.delete({ timeout: 8000 }));
-    }
+exports.TicketCreate = async function (interaction, client) {
+  
     let guild = client.guilds.cache.get('343532544559546368');
 
     await guild.channels
-        .create(`ticket→${user.id}`, {
+        .create(`ticket→${interaction.user.id}`, {
             type: 'text',
+            topic: interaction.user.id.toString(),
             permissionOverwrites: [
                 {
                     id: guild.roles.everyone,
                     deny: ['VIEW_CHANNEL'],
                 },
                 {
-                    id: user.id,
+                    id: interaction.user.id,
                     allow: ['VIEW_CHANNEL'],
                 },
             ],
             parent: '729848799421530173',
         })
         .then(async (m) => {
-            reaction.message.channel.send(ChannelCreated(user, m)).then((m) => m.delete({ timeout: 5000 }));
-            m.send(`${user}`).then((m) => m.delete());
-            await m.send(TicketStart(user));
+            interaction.reply({embeds: [ChannelCreated(interaction.user, m)], ephemeral: true});
+            m.send(`${interaction.user}`).then((m) => m.delete());
+            await m.send({embeds: [TicketStart(interaction.user).embed], components: [TicketStart(interaction.user).lista]});
 
-            const filter = (m) =>
-                (m.author == user && m.content === '1') ||
-                m.content === '2' ||
-                m.content === '3' ||
-                m.content === '4' ||
-                m.content === '5';
+            const filter = i => {
+                i.deferUpdate();
+                return i.user.id === interaction.user.id;
+            };
 
             await m
-                .awaitMessages(filter, { max: 1, time: 45000, errors: ['time'] })
+                .awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 45000})
                 .then(async (response) => {
                     await m.bulkDelete(10);
-                    await m.send(TicketServerOptions(user));
-                    const filter2 = (m) =>
-                        (m.author == user && m.content === '1') ||
-                        m.content === '2' ||
-                        m.content === '3' ||
-                        m.content === '4' ||
-                        m.content === '5' ||
-                        m.content === '6' ||
-                        m.content === '7';
+
+                    await m.send({embeds: [TicketServerOptions(interaction.user).embed], components: [TicketServerOptions(interaction.user).lista]});
+                    const filter = i => {
+                        i.deferUpdate();
+                        return i.user.id === interaction.user.id;
+                    };
 
                     await m
-                        .awaitMessages(filter2, { max: 1, time: 45000, errors: ['time'] })
+                        .awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 45000})
                         .then(async (response2) => {
-                            await m.bulkDelete(10);
+                         
+                             await m.bulkDelete(10);
 
-                            const ServerFound = serversInfos.find((f) => f.serverNumber == response2.first().content);
+                            const ServerFound = serversInfos.find((f) => f.name == response2.values[0]);
 
-                            const ticketOptions = Options[response.first().content];
+                            const ticketOptions = Options[response.values[0]];
 
                             const roles = {
                                 servidor: ServerFound.name,
@@ -68,7 +59,7 @@ exports.TicketCreate = async function (client, reaction, user) {
                                 roleStaffComprado: ServerFound.tagComprado,
                             };
 
-                            ticketOptions(m, user, roles);
+                            ticketOptions(m, interaction.user, roles); 
                         })
                         .catch((error) => {
                             return m.delete(), console.log(error);

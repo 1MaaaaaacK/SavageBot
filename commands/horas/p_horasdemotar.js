@@ -5,66 +5,46 @@ const { serversInfos, servidoresHoras } = require('../../configs/config_geral');
 module.exports = {
     name: 'horasdemotar',
     description: 'Ver as horas in-game dos staffs',
-    usage: 'servidor - steamid',
+    options: [{name: 'servidor', type: 3, description: 'Escolha um Servidor', required: true, choices: servidoresHoras.map(m => { return {name: m, value: m}})}],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826'], // Gerente
-    args: 1,
-    async execute(client, message, args) {
-        message.delete({ timeout: 1000 });
-        let splitarg = args.join(' ').split(' - ');
+    permissions: [{id: '711022747081506826', type: 1, permission: true}, // Gerente
+                {id: '831219575588388915', type: 1, permission: true}], //perm set
+    async execute(client, interaction) {
 
-        let servidor = String(splitarg[0]).toLowerCase();
-
-        if (!servidor)
-            return message.channel
-                .send(`${message.author} **| A forma correta de usar é: !horasdemotar - servidor**`)
-                .then((m) => m.delete({ timeout: 10000 }));
-
-        const servidoresHorasFound = servidoresHoras.find((m) => m === servidor);
-
-        if (servidoresHorasFound == undefined)
-            return message.channel
-                .send(
-                    `😫 **| ${
-                        message.author
-                    } Você errou o servidor!!!\nOs servidores sao:**\n\`\`\`${servidoresHoras.map(function (server) {
-                        return ` ${server}`;
-                    })}\`\`\``
-                )
-                .then((m) => m.delete({ timeout: 10000 }));
+        let servidor = interaction.options.getString('servidor').toLowerCase()
 
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
-        if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
-            return message.channel
-                .send(
-                    `😫 **| <@${message.author.id}> Você não pode ter esse servidor como alvo, pois você não é gerente dele!**`
-                )
-                .then((m) => m.delete({ timeout: 7000 }));
+        if (!interaction.member._roles.find(m => m == serversInfosFound.gerenteRole))
+            return interaction.reply({
+                content:`😫 **| <@${interaction.user.id}> Você não pode ter esse servidor como alvo, pois você não é gerente dele!**`
+            })
+            .then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         const con = connection.promise();
 
-        let canalCheck = client.channels.cache.find((m) => m.name === `horasdemotar→${message.author.id}`);
+        let canalCheck = client.channels.cache.find((m) => m.name === `horasdemotar→${interaction.user.id}`);
 
         if (canalCheck === undefined) {
-            await message.guild.channels.create(`horasdemotar→${message.author.id}`, {
+            await interaction.guild.channels.create(`horasdemotar→${interaction.user.id}`, {
                 type: 'text',
                 permissionOverwrites: [
                     {
-                        id: message.guild.roles.everyone,
+                        id: interaction.guild.roles.everyone,
                         deny: ['VIEW_CHANNEL'],
                     },
                     {
-                        id: message.author.id,
+                        id: interaction.user.id,
                         allow: ['VIEW_CHANNEL'],
                     },
                 ],
                 parent: '818261624317149235',
             });
-            canalCheck = client.channels.cache.find((m) => m.name === `horasdemotar→${message.author.id}`);
+            canalCheck = client.channels.cache.find((m) => m.name === `horasdemotar→${interaction.user.id}`);
         }
-
-        message.channel.send(`Canal criado com sucesso <#${canalCheck.id}>`).then((m) => m.delete({ timeout: 5000 }));
+        interaction.deferReply()
+        interaction.followUp({content: `Canal criado com sucesso <#${canalCheck.id}>`}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         let canalAwait = canalCheck;
         let guild = client.guilds.cache.get('792575394271592458');
@@ -81,7 +61,7 @@ module.exports = {
 
         if (result == '') {
             return (
-                await canalCheck.send('Não achei ninguém com hora menor!! Deletando canal'),
+                await canalCheck.send({content: 'Não achei ninguém com hora menor!! Deletando canal'}),
                 setTimeout(async function () {
                     canalCheck.delete();
                 }, 6000)
@@ -108,10 +88,10 @@ module.exports = {
                     { name: 'Horas Jogadas', value: `${HourFormat(result[i].time)}` }
                 );
 
-            await canalAwait.send(formMessage);
+            await canalAwait.send({embeds: [formMessage]});
 
             const filter = (f) =>
-                (f.author == message.author && f.content.toLowerCase() === 'demotar') ||
+                (f.author == interaction.user && f.content.toLowerCase() === 'demotar') ||
                 f.content.toLowerCase() === 'proximo';
 
             await canalAwait
@@ -127,10 +107,10 @@ module.exports = {
                             var fetchUser = await client.users.fetch(result[i].discord_id);
                         } catch (error) {
                             canalAwait
-                                .send(
-                                    `**<@${message.author.id}> | Não achei o discord desse player, confira se ele realmente está no discord!!**`
-                                )
-                                .then((m) => m.delete({ timeout: 12000 }));
+                                .send({content:
+                                    `**<@${interaction.user.id}> | Não achei o discord desse player, confira se ele realmente está no discord!!**`
+                                })
+                        
                             console.log(error);
                         }
 
@@ -144,13 +124,13 @@ module.exports = {
                             .addFields(
                                 {
                                     name: 'discord',
-                                    value: fetchUser,
+                                    value: fetchUser.toString(),
                                 },
                                 { name: 'Steamid', value: steamid },
                                 { name: 'Servidor', value: servidor.toUpperCase() },
                                 { name: 'Observações', value: extra }
                             )
-                            .setFooter(`Demotado Pelo ${message.author.username}`);
+                            .setFooter(`Demotado Pelo ${interaction.user.username}`);
 
                         const demotedSendMSG = new Discord.MessageEmbed()
                             .setColor('FF0000')
@@ -165,12 +145,12 @@ module.exports = {
                             );
 
                         try {
-                            fetchUser.send(demotedSendMSG);
+                            fetchUser.send({embeds: [demotedSendMSG]});
                         } catch (error) {}
 
                         let canal = guild.channels.cache.find((channel) => channel.id == '792576104681570324');
 
-                        canal.send(logDemoted);
+                        canal.send({embeds: [logDemoted]});
 
                         [result] = await con.query(
                             `SELECT * FROM vip_sets where server_id = (select vip_servers.id from vip_servers where vip_servers.server_name = '${servidor}')`
@@ -185,11 +165,11 @@ module.exports = {
 
                         setInfos = setInfos.join('\n');
 
-                        for (let j in serversInfos[serversInfosFound.serverNumber].identifier) {
+                        for (let j in serversInfosFound.identifier) {
                             try {
                                 await fetch(
                                     `https://panel.mjsv.us/api/client/servers/${
-                                        serversInfos[serversInfosFound.serverNumber].identifier[j]
+                                        serversInfosFound.identifier[j]
                                     }/files/write?file=%2Fcsgo%2Faddons%2Fsourcemod%2Fconfigs%2Fadmins_simple.ini`,
                                     {
                                         method: 'POST',
@@ -203,11 +183,10 @@ module.exports = {
                                 );
                             } catch (error) {
                                 return (
-                                    message.channel
-                                        .send(
-                                            `${message.author} **| Não consegui setar o player, entre em contato com o 1Mack**`
-                                        )
-                                        .then((m) => m.delete({ timeout: 7000 })),
+                                    canalAwait.send({content:
+                                            `${interaction.user} **| Não consegui remover o cargo do staff de dentro do servidor, entre em contato com o 1Mack**`
+                                        })
+                                        .then((m) => setTimeout(() => m.delete(), 10000)),
                                     console.log(error)
                                 );
                             }
@@ -215,7 +194,7 @@ module.exports = {
                             try {
                                 fetch(
                                     `https://panel.mjsv.us/api/client/servers/${
-                                        serversInfos[serversInfosFound.serverNumber].identifier[j]
+                                        serversInfosFound.identifier[j]
                                     }/command`,
                                     {
                                         method: 'POST',
@@ -233,7 +212,7 @@ module.exports = {
                 })
                 .catch(() => {
                     return (
-                        canalAwait.send(`${message.author} **| Você não respondeu a tempo....Deletando Canal**`),
+                        canalAwait.send({content: `${interaction.user} **| Você não respondeu a tempo....Deletando Canal**`}),
                         setTimeout(async function () {
                             canalAwait.delete();
                         }, 6000)
@@ -241,7 +220,7 @@ module.exports = {
                 });
         }
 
-        await canalCheck.send('Todos os forms já foram lidos!');
+        await canalCheck.send({content: 'Todos os forms já foram lidos!'});
         setTimeout(async function () {
             canalCheck.delete();
         }, 6000);

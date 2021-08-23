@@ -2,8 +2,8 @@ const Discord = require('discord.js');
 const { query } = require('gamedig');
 const {serversInfos} = require('../../configs/config_geral')
 const { webhookIpServidores, webhookPlayersTotal } = require('../../configs/config_webhook');
-const webhookIpServidoresSend = new Discord.WebhookClient(webhookIpServidores.id, webhookIpServidores.token);
-const webhookPlayersTotalSend = new Discord.WebhookClient(webhookPlayersTotal.id, webhookPlayersTotal.token);
+const webhookIpServidoresSend = new Discord.WebhookClient({id: webhookIpServidores.id, token: webhookIpServidores.token});
+const webhookPlayersTotalSend = new Discord.WebhookClient({id: webhookPlayersTotal.id, token: webhookPlayersTotal.token});
 var Catch = [];
 
 async function mapUpdate() {
@@ -33,10 +33,10 @@ async function mapUpdate() {
     
     let embedImg = new Discord.MessageEmbed()
         .setColor('36393f')
-        .setImage('https://cdn.discordapp.com/attachments/751428595536363610/837855972663754792/savage-servidores3.gif')
+        .setImage('https://cdn.discordapp.com/attachments/814295769699713047/877679866219233350/ip-dos-servidores.gif')
     let embed = new Discord.MessageEmbed()
         .setColor('36393f')
-        .setDescription(CatchFormat)
+        .setDescription(CatchFormat.toString())
         .setFooter('A lista atualizada a cada 5 minutos')
         .setTimestamp()
 let cont = 0, contTotal = 0

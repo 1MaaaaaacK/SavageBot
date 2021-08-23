@@ -8,13 +8,14 @@ const chalk = require('chalk');
 module.exports = {
     name: 'procurar',
     description: 'Ver o cargo de um staff atrabés do @ dele',
-    usage: 'Servidor - Steamid **ou** !procurar servidor',
+    options: [{name: 'servidor', type: 3, description: 'Escolher um Servidor para o Set', required: true, choices: serversInfos.map(m => { return {name: m.name, value: m.name}})},
+            {name: 'steamid', type: 3, description: 'steamid do Player', required: false, choices: null}],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826'], // Gerente
-    args: 1,
-    async execute(client, message, args) {
-        let servidor = String(args[0]).toLowerCase(),
-            steamid = args[1];
+    permissions: [{id: '711022747081506826', type: 1, permission: true}], // Gerente
+    async execute(client, interaction) {
+        let steamid = interaction.options.getString('steamid'),
+        servidor = interaction.options.getString('servidor').toLowerCase()
 
         if (steamid !== undefined && steamid.startsWith('STEAM_0')) {
             steamid = steamid.replace('0', '1');
@@ -23,10 +24,10 @@ module.exports = {
         const serversInfosFound = serversInfos.find((m) => m.name === servidor);
 
         if (serversInfosFound == undefined)
-            return message.channel.send(WrongServer(message, serversInfos)).then((m) => m.delete({ timeout: 10000 }));
+            return interaction.reply({embeds: [WrongServer(interaction, serversInfos)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
-        if (!message.member.roles.cache.has(serversInfosFound.gerenteRole))
-            return message.channel.send(GerenteError(message)).then((m) => m.delete({ timeout: 7000 }));
+        if (!interaction.member._roles.find(m => m == serversInfosFound.gerenteRole))
+            return interaction.reply({embeds: [GerenteError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
 
         let rows;
         const con = connection.promise();
@@ -39,14 +40,14 @@ module.exports = {
             );
         } catch (error) {
             return (
-                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 10000 })),
+                interaction.reply({embeds: [InternalServerError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)),
                 console.error(chalk.redBright('Erro no Select'), error)
             );
         }
         if (rows == '') {
-            return message.channel.send(SteamIdNotFound(message, steamid)).then((m) => {
-                m.delete({ timeout: 6000 });
-            });
+            return interaction.reply({embeds: [SteamIdNotFound(interaction, steamid)]}).then(() => 
+                setTimeout(() => interaction.deleteReply(), 10000)
+            );
         }
         let setInfos = rows.map((item) => {
             return `"${item.steamid}"  "@${item.cargo}" //${
@@ -58,11 +59,11 @@ module.exports = {
 
         setInfos = setInfos.join('\n');
 
-        message.channel.send(`**<@${message.author.id}> | Te mandei os players setados no seu privado!**`).then((m) => {
-            m.delete({ timeout: 6000 });
-        });
+        interaction.reply({content: `**${interaction.user} | Te mandei os players setados no seu privado!**`}).then(() => 
+        setTimeout(() => interaction.deleteReply(), 10000)
+        );
 
-        const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 2042 });
+        const [first, ...rest] = Discord.Util.splitMessage(setInfos, { maxLength: 4096 });
 
         const logStaffFind = new Discord.MessageEmbed()
             .setColor('#0099ff')
@@ -72,15 +73,15 @@ module.exports = {
             .setDescription(`\`\`\`${first}\`\`\``);
 
         if (!rest.length) {
-            return message.author.send(logStaffFind);
+            return interaction.user.send({embeds: [logStaffFind]});
         }
 
-        await message.author.send(logStaffFind);
+        await interaction.user.send({embeds: [logStaffFind]});
 
         for (const text of rest) {
             logStaffFind.setDescription(`\`\`\`${text}\`\`\``);
             logStaffFind.setTitle('');
-            await message.author.send(logStaffFind);
+            await interaction.user.send({embeds: [logStaffFind]});
         }
     },
 };

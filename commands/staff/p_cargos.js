@@ -5,21 +5,21 @@ const Discord = require('discord.js');
 module.exports = {
     name: 'cargos',
     description: 'Ver os cargos do player in-game',
-    usage: '@ do player',
+    options: [{name: 'discord', type: 6, description: 'discord do player', required: true, choices: null}],
+    default_permission: false,
     cooldown: 0,
-    permissions: ['711022747081506826'], //Perm ban
-    args: 1,
-    async execute(client, message, args) {
-        let discord = args[0];
+    permissions: [{id: '711022747081506826', type: 1, permission: true}],
+    async execute(client, interaction) {
+        let discord1 = interaction.options.getUser('discord')
 
-        discord = discord.slice(0, -1).substring(3);
+        
 
         try {
-            var fetchUser = await client.users.fetch(discord);
+            var fetchUser = await client.users.fetch(discord1.id);
         } catch (error) {
-            return message.channel.send(PlayerDiscordNotFound(message));
+            return interaction.reply({embeds: [PlayerDiscordNotFound(interaction)]});
         }
-
+        
         let StaffFoundEmbed = new Discord.MessageEmbed().setColor('#0099ff').setTitle(fetchUser.username);
         let StaffFoundEmbed2 = new Discord.MessageEmbed().setColor('#0099ff').setTimestamp();
 
@@ -30,18 +30,16 @@ module.exports = {
             [rows] = await con.query(
                 `select * from vip_sets inner join vip_servers
             on vip_sets.server_id = vip_servers.id
-            where discord_id ='${discord}'`
+            where discord_id ='${discord1.id}'`
             );
         } catch (error) {
             return (
-                message.channel.send(InternalServerError(message)).then((m) => m.delete({ timeout: 5000 })),
+                interaction.reply({embeds: [InternalServerError(interaction)]}).then(() => setTimeout(() => interaction.deleteReply(), 10000)),
                 console.error(chalk.redBright('Erro no Banimento'), error)
             );
         }
         if (rows == '') {
-            return message.channel.send(`**<@${message.author.id}> | Não encontrei**`).then((m) => {
-                m.delete({ timeout: 7000 });
-            });
+            return interaction.reply({content: `**<@${interaction.user.id}> | Não encontrei**`}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
         }
 
         rows.forEach((m, i) => {
@@ -86,10 +84,10 @@ module.exports = {
             }
         });
 
-        message.channel.send('**Te enviei os cargos desse staff no seu PV**').then((m) => m.delete({ timeout: 5000 }));
-        await message.author.send(StaffFoundEmbed);
+        interaction.reply({content: '**Te enviei os cargos desse staff no seu PV**'}).then(() => setTimeout(() => interaction.deleteReply(), 10000));
+        await interaction.user.send({embeds: [StaffFoundEmbed]});
         if (StaffFoundEmbed2.fields != '') {
-            await message.author.send(StaffFoundEmbed2);
+            await interaction.user.send({embeds: [StaffFoundEmbed2]});
         }
     },
 };

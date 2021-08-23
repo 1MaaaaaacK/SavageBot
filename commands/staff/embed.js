@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-exports.LogAdv = function (discord, adv, reason, message) {
+exports.LogAdv = function (discord, adv, reason, interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setTitle(`**ADV**`)
@@ -12,62 +12,70 @@ exports.LogAdv = function (discord, adv, reason, message) {
             { name: 'ADV:', value: `**${adv}**` },
             { name: 'Motivo:', value: reason }
         )
-        .setFooter(`Aplicada Pelo ${message.author.username}`);
+        .setFooter(`Aplicada Pelo ${interaction.user.username}`);
+    return embed;
+};
+exports.AdvWarning = function (interaction, discord) {
+    const embed = new Discord.MessageEmbed()
+        .setColor('#ff0000')
+        .setDescription(
+            `<a:warning_savage:856210165338603531> O staff ${discord} está com **3 advertências**`
+        );
     return embed;
 };
 
-exports.AvdSuccess = function (message) {
+exports.AdvSuccess = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#00ff00')
-        .setDescription(`<a:right_savage:856211226300121098> ${message.author}, Adv aplicada no staff com sucesso !`);
+        .setDescription(`<a:right_savage:856211226300121098> ${interaction.user}, Adv aplicada no staff com sucesso !`);
     return embed;
 };
 
-exports.WrongUsage = function (message) {
+exports.WrongUsage = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Voce não pode por o título, a descrição e a imagem como 'null' todos ao mesmo tempo !`
+            `<a:warning_savage:856210165338603531> ${interaction.user}, Voce não pode por o título, a descrição e a imagem como 'null' todos ao mesmo tempo !`
         );
     return embed;
 };
 
-exports.WrongNumber = function (message) {
+exports.WrongNumber = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, A quantidade máxima de mensagens que eu posso deletar são 99 e a mínima é 1 !`
+            `<a:warning_savage:856210165338603531> ${interaction.user}, A quantidade máxima de mensagens que eu posso deletar são 99 e a mínima é 1 !`
         );
     return embed;
 };
 
-exports.MissingPermission = function (message) {
+exports.MissingPermission = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Você não tem permissão para excluir msgs de bots. Irei excluir apenas as msgs de players !`
+            `<a:warning_savage:856210165338603531> ${interaction}, Você não tem permissão para excluir msgs de bots. Irei excluir apenas as msgs de players !`
         );
     return embed;
 };
 
-exports.OldMessage = function (message) {
+exports.OldMessage = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Não consegui excluir as msgs, provavelmente tem alguma que é mais antiga do que 14 dias! !`
+            `<a:warning_savage:856210165338603531> ${interaction}, Não consegui excluir as msgs, provavelmente tem alguma que é mais antiga do que 14 dias! !`
         );
     return embed;
 };
 
-exports.WrongUsageOfCommand = function (message) {
+exports.WrongUsageOfCommand = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Você escreveu algo errado, digite !rsugestao para ver a forma correta de usar o comando !`
+            `<a:warning_savage:856210165338603531> ${interaction}, Você escreveu algo errado, digite !rsugestao para ver a forma correta de usar o comando !`
         );
     return embed;
 };
-exports.newEmbed = function (valido, m, resposta, message) {
+exports.newEmbed = function (valido, m, resposta, interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor(valido.color)
         .setTitle(`***${valido.title}***`)
@@ -83,42 +91,42 @@ exports.newEmbed = function (valido, m, resposta, message) {
             { name: `\u200B`, value: resposta, inline: true },
             { name: '\u200B', value: '\u200B', inline: false }
         )
-        .setFooter(`Respondido pelo ${message.author.username}`)
+        .setFooter(`Respondido pelo ${interaction.user.username}`)
         .setTimestamp();
     return embed;
 };
-exports.UserSendEmbed = function (valido, messageid) {
+exports.UserSendEmbed = function (valido, interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor(valido.color)
         .setTitle(`Sua sugestão foi ${valido.title.substring(0, valido.title.length - 1) + 'a'}!`)
         .setDescription(`> Link da sua sugestão: 
-    > https://discord.com/channels/343532544559546368/778411417291980830/${messageid}`);
+    > https://discord.com/channels/343532544559546368/778411417291980830/${interaction}`);
     return embed;
 };
 
-exports.FormAlreadyOpened = function (message) {
+exports.FormAlreadyOpened = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Já tem alguem vendo os formulários desse servidor !`
+            `<a:warning_savage:856210165338603531> ${interaction}, Já tem alguem vendo os formulários desse servidor !`
         );
     return embed;
 };
 
-exports.FormCompleted = function (message) {
+exports.FormCompleted = function (interaction) {
     const embed = new Discord.MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
-            `<a:warning_savage:856210165338603531> ${message.author}, Não há mais ninguém que tenha feito o form !`
+            `<a:warning_savage:856210165338603531> ${interaction}, Não há mais ninguém que tenha feito o form !`
         );
     return embed;
 };
 
-exports.FormCreated = function (message, canalCheck) {
+exports.FormCreated = function (interaction, canalCheck) {
     const embed = new Discord.MessageEmbed()
         .setColor('#00ff00')
         .setDescription(
-            `<a:right_savage:856211226300121098> ${message.author}, canal criado com sucesso <#${canalCheck.id}> !`
+            `<a:right_savage:856211226300121098> ${interaction}, canal criado com sucesso <#${canalCheck.id}> !`
         );
     return embed;
 };

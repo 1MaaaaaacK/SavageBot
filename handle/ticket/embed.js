@@ -1,7 +1,7 @@
-const Discord = require('discord.js');
+const {MessageEmbed, MessageActionRow, MessageSelectMenu} = require('discord.js');
 
 exports.HasAlreadyChannel = function (user, canalAwait) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('#ff0000')
         .setDescription(
             `<a:warning_savage:856210165338603531> ${user}, você já possui uma sala, <#${canalAwait.id}> !`
@@ -10,7 +10,7 @@ exports.HasAlreadyChannel = function (user, canalAwait) {
 };
 
 exports.TicketStart = function (user) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('36393f')
         .setTitle('Savage Servidores')
         .setDescription(
@@ -18,74 +18,77 @@ exports.TicketStart = function (user) {
             
             > Bem vindo ao nosso suporte <a:engrenagem_savage:856206695587250186>
             > 
-            > Escolha qual tipo de ticket você quer abrir **(Digite o número no chat)**
-            
-
-            <a:savage_1:839189109943042097> Bugs
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_2:839189111172628550>  Denúncia
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_3:839189110165995570>  Banimento
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_4:839189110630776863>  Compra de Cargo
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_5:839189110480306186>  Dúvidas
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-            
-            `
+            > Escolha qual tipo de ticket você quer abrir clicando na lista abaixo`
         )
         .setThumbnail('https://cdn.discordapp.com/attachments/823663459145089055/834833230452621322/1619110021129.png')
         .setFooter(
             'Sistema de Ticket Exclusivo da Savage Servidores',
             'https://cdn.discordapp.com/attachments/823663459145089055/834833230452621322/1619110021129.png'
         );
-    return embed;
+        const row = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+            .setCustomId('TicketFirstOption')
+            .setPlaceholder('Nada Selecionado')
+            .addOptions([
+                {
+                    label: 'Banimento',
+                    description: 'Foi banido injustamente? Clique aqui!',
+                    value: 'banimento',
+                    emoji: '🚫'
+                },
+                {
+                    label: 'Bugs',
+                    description: 'Está com algum bug? Clique aqui!',
+                    value: 'bugs',
+                    emoji: '⚙️'
+
+                },
+                {
+                    label: 'Compra de Cargo',
+                    description: 'Quer comprar algum cargo? Clique aqui!',
+                    value: 'compra_cargo',
+                    emoji: '💎'
+
+                },
+                {
+                    label: 'Denúncia',
+                    description: 'Quer reportar um player? Clique aqui!',
+                    value: 'denuncia',
+                    emoji: '⚠️'
+
+                },
+                {
+                    label: 'Dúvida',
+                    description: 'Está com alguma dúvida? Clique aqui!',
+                    value: 'duvida',
+                    emoji: '🆘'
+
+                },
+            ])
+        )
+    return {embed: embed, lista: row};
 };
 
 exports.ChannelCreated = function (user, m) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('#00ff00')
         .setDescription(`<a:right_savage:856211226300121098> ${user}, sua sala já foi criada, <#${m.id}> !`);
     return embed;
 };
 
 exports.TicketServerOptions = function (user) {
-    const embed = new Discord.MessageEmbed()
+    const {serversInfos} = require('../../configs/config_geral')
+    const emojis = ['<a:savage_1:839189109943042097>', '<a:savage_2:839189111172628550>', '<a:savage_3:839189110165995570>',
+    '<a:savage_4:839189110630776863>', '<a:savage_5:839189110480306186>', '<a:savage_6:839199778172043275>', '<a:savage_7:839199778364457013>',
+    '<a:savage_8:839199778516500510>', '<a:savage_9:839199778494480394>']
+    const embed = new MessageEmbed()
         .setColor('36393f')
         .setTitle('Savage Servidores')
         .setDescription(
             `${user},
             
             > Escolha para qual servidor você deseja que o ticket seja aberto
-            > 
-            > **(Digite o número no chat)**
-            
-
-            <a:savage_1:839189109943042097> → JailBreak
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_2:839189111172628550> → Deathrun 
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_3:839189110165995570> → AWP
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_4:839189110630776863> → Mix
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-
-            <a:savage_5:839189110480306186> → Retake
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-            
-            <a:savage_6:839199778172043275> → RetakePistol
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-            
-            <a:savage_7:839199778364457013> → Surf
-            ▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
-           
             `
         )
         .setThumbnail('https://cdn.discordapp.com/attachments/823663459145089055/834833230452621322/1619110021129.png')
@@ -93,11 +96,24 @@ exports.TicketServerOptions = function (user) {
             'Sistema de Ticket Exclusivo da Savage Servidores',
             'https://cdn.discordapp.com/attachments/823663459145089055/834833230452621322/1619110021129.png'
         );
-    return embed;
+    const row = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+            .setCustomId('TicketSecondOption')
+            .setPlaceholder('Nada Selecionado')
+            .addOptions(serversInfos.map((m, i) => {
+                return {
+                    label: m.visualName.toString(),
+                    value: m.name.toString(),
+                    emoji: emojis[i].toString()
+                }
+            }))
+        )
+    return {embed: embed, lista: row};
 };
 
 exports.TicketTypeChoosed = function (user, type, servidor) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('36393f')
         .setTitle(`***Ticket de ${type}***`)
         .setDescription(
@@ -107,7 +123,7 @@ exports.TicketTypeChoosed = function (user, type, servidor) {
 
             >  Servidor Escolhido: **${servidor.toUpperCase()}**
             > 
-            > Para fechar o Ticket, reaja com <:lock_savage:856224681136226314>
+            > Para fechar o Ticket, clique no botao <:lock_savage:856224681136226314>
             `
         )
         .setThumbnail('https://cdn.discordapp.com/attachments/823663459145089055/834833230452621322/1619110021129.png')
@@ -119,7 +135,7 @@ exports.TicketTypeChoosed = function (user, type, servidor) {
 };
 
 exports.TicketClosed = function (user) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('36393f')
         .setTitle(`***Ticket Fechado***`)
         .setDescription(
@@ -140,30 +156,30 @@ exports.TicketClosed = function (user) {
 };
 
 exports.TicketOpened = function (user) {
-    const embed = new Discord.MessageEmbed().setColor('36393f').setDescription(`***Ticket aberto pelo ${user}***`);
+    const embed = new MessageEmbed().setColor('36393f').setDescription(`***Ticket aberto pelo ${user}***`);
     return embed;
 };
 
 exports.TicketSaved = function (user) {
-    const embed = new Discord.MessageEmbed().setColor('36393f').setDescription(`***Ticket salvo pelo ${user}***`);
+    const embed = new MessageEmbed().setColor('36393f').setDescription(`***Ticket salvo pelo ${user}***`);
     return embed;
 };
 
 exports.TicketDeleting = function () {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('36393f')
         .setDescription(`***Deletando Ticket em 5 segundos   <a:savage_loading:837104765338910730>***`);
     return embed;
 };
 
 exports.TicketLog = function (user, action, channel) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor('36393f')
-        .setAuthor(user.username, user.displayAvatarURL())
+        .setAuthor(user.username.toString(), user.displayAvatarURL().toString())
         .addFields(
-            { name: 'Discord', value: user },
-            { name: 'Ação', value: action },
-            { name: 'Ticket', value: channel }
+            { name: 'Discord', value: user.toString() },
+            { name: 'Ação', value: action.toString() },
+            { name: 'Ticket', value: `${channel.name}${(channel.topic)}` }
         );
     return embed;
 };

@@ -1,29 +1,28 @@
 const { WrongChannel, SugestaoLog } = require('./embed');
 module.exports = {
     name: 'sugestao',
-    description: 'Fazer sugestão',
-    usage: '',
+    description: 'Sugerir algo para o servidor',
+    options: [{name: 'sugestao', type: 3, description: 'Sua sugestão', required: true, choices: null}],
+    default_permission: true,
     cooldown: 30,
-    permissions: false,
-    args: 1,
-    async execute(client, message, args) {
-        if (message.channel.id !== '778411417291980830')
+    permissions: [],
+    async execute(client, interaction) {
+
+        if (interaction.channelId !== '710291543608655892')
             return (
-                message.channel.send(WrongChannel(message)).then((m) => {
-                    m.delete({ timeout: 5000 });
-                }),
-                client.channels.cache
-                    .get('770401787537522738')
-                    .send(`<@${message.author.id}> usou o comando !sugestao fora do chat sugestao!!`)
-            );
+                interaction.reply({content: 'Você só pode usar esse comando no <#710291543608655892>', ephemeral: true})
+                )
 
-        let sugestao = args[0];
-
+         let sugestao = interaction.options.getString('sugestao')
+                interaction.reply({content: '<a:right_savage:856211226300121098> **Sugestão enviada com sucesso!**'})
         client.channels.cache
             .get('778411417291980830')
-            .send(SugestaoLog(message, sugestao))
-            .then((message) => message.react('778432828148023297').then(() => message.react('778432818862227526')));
+            .send({embeds: [SugestaoLog(interaction, sugestao)]})
+            .then(async (message) => {
+                await message.react('778432828148023297')
+                await message.react('778432818862227526')
+            });
 
-        client.channels.cache.get('770401787537522738').send(`<@${message.author.id}> enviou uma sugestão!`);
+        client.channels.cache.get('770401787537522738').send(`${interaction.user} enviou uma sugestão!`); 
     },
 };

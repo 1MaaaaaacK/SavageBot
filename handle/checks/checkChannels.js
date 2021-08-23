@@ -4,7 +4,7 @@ const { webhookVipExpirado, webhookIpServidores } = require('../../configs/confi
 
 async function checkChannels(message, client) {
     if (message.channel.id === '795494831291891774') {
-        if (message.webhookID !== webhookVipExpirado.id) return;
+        if (message.webhookId !== webhookVipExpirado.id) return;
 
         message.embeds.forEach(async (embed) => {
             let usuarioInfo = {
@@ -19,16 +19,16 @@ async function checkChannels(message, client) {
             await client.guilds.cache
                 .get('343532544559546368')
                 .channels.cache.find((channel) => channel.id === '710288627103563837')
-                .send(`<@${usuarioInfo.id}>`)
-                .then((m) => m.delete({ timeout: 1000 }));
+                .send({content: `<@${usuarioInfo.id}>`})
+                .then((m) => m.delete());
             let fechedUserBool = true;
             try {
                 var fetchUser = await client.users.fetch(usuarioInfo.id);
             } catch (error) {
                 return (
-                    canal.send(
+                    canal.send({content: 
                         `**Não achei o discord do player <@${usuarioInfo.id}>, mas eu já removi ele do admins_simple.**`
-                    ),
+                    }),
                     console.log(error)
                 );
             } finally {
@@ -49,10 +49,10 @@ async function checkChannels(message, client) {
                 )
                 .addFields(
                     { name: '\u200B', value: '\u200B' },
-                    { name: 'Seu Código', value: usuarioInfo.codigo },
+                    { name: 'Seu Código', value: usuarioInfo.codigo.toString() },
                     {
                         name: 'Como faço para resgatar?',
-                        value: `Basta ir no canal: <#757707472663216140>, após isso abra um ticket e escreva a seguinte mensagem:
+                        value: `Basta ir no canal: <#855200110685585419>, após isso abra um ticket e escreva a seguinte mensagem:
 
   \`\`\`fix\nQuero renovar meu plano com o código ${usuarioInfo.codigo}\`\`\``,
                         inline: false,
@@ -66,7 +66,7 @@ async function checkChannels(message, client) {
                 .setImage('https://cdn.discordapp.com/attachments/719223540783775804/730203351521689660/savage.png');
 
             try {
-                await fetchedUser.send(embedVipExpirado);
+                await fetchedUser.send({embeds: [embedVipExpirado]});
             } catch (error) {
                 console.log(error);
             }
@@ -87,18 +87,18 @@ async function checkChannels(message, client) {
 
                 if (cont > 1) {
                     await fetchedUser.roles.remove(serversInfosFound.tagVip);
-                    canal.send(`**Vip Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`);
+                    canal.send({content: `**Vip Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`});
                 } else {
                     fetchedUser.roles.remove([serversInfosFound.tagVip, '753728995849142364']);
-                    canal.send(`**Vip Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`);
+                    canal.send({content: `**Vip Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`});
                 }
             } else {
                 const serversInfosFound = serversInfos.find((m) => m.name === usuarioInfo.servidor);
 
                 if (serversInfosFound == undefined)
-                    return canal.send(
+                    return canal.send({content: 
                         `😫 **| Não achei o servidor o qual o <@${usuarioInfo.id}> expirou o cargo comprado**`
-                    );
+                    });
 
                 let cont = 0;
 
@@ -114,16 +114,16 @@ async function checkChannels(message, client) {
 
                 if (cont > 1) {
                     await fetchedUser.roles.remove(serversInfosFound.tagComprado);
-                    canal.send(`**Staff Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`);
+                    canal.send({content: `**Staff Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`});
                 } else {
                     fetchedUser.roles.remove([serversInfosFound.tagComprado, '722814929056563260']);
-                    canal.send(`**Staff Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`);
+                    canal.send({content: `**Staff Expirado |** Removi a tag do <@${usuarioInfo.id}> com sucesso`});
 
                     if (fetchedUser.nickname != null) {
                         fetchedUser.setNickname(fetchedUser.nickname.substr(9)).catch((error) => {
-                            canal.send(
+                            canal.send({content: 
                                 `**<@${message.author.id}> | Não consegui renomear o player, tente fazer isso manualmente!**`
-                            );
+                            });
                             console.log(error);
                         });
                     }
@@ -131,7 +131,7 @@ async function checkChannels(message, client) {
             }
         });
     } else if (message.channel.id === '717331699125714986') {
-        if (message.webhookID !== webhookIpServidores.id) return;
+        if (message.webhookId !== webhookIpServidores.id) return;
         message.channel.messages.fetch().then((m) => {
             let msgs = m.map((array) => array.id);
             msgs.shift();

@@ -4,8 +4,8 @@ const { webhookVipExpirado, webhookSavageLogs } = require('../../configs/config_
 const { serversInfos } = require('../../configs/config_geral');
 const { panelApiKey, connection } = require('../../configs/config_privateInfos');
 
-const webhookLogs = new Discord.WebhookClient(webhookVipExpirado.id, webhookVipExpirado.token);
-const webhookChecagemLogs = new Discord.WebhookClient(webhookSavageLogs.id, webhookSavageLogs.token);
+const webhookLogs = new Discord.WebhookClient({id: webhookVipExpirado.id, token: webhookVipExpirado.token});
+const webhookChecagemLogs = new Discord.WebhookClient({id: webhookSavageLogs.id, token: webhookSavageLogs.token});
 
 async function checagem() {
     for (let y in serversInfos) {
