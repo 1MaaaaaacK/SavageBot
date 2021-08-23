@@ -53,12 +53,12 @@ const rest = new REST({ version: '9' }).setToken(botConfig.token);
 		console.log('Started refreshing application (/) commands.');
 
 		await rest.put(
-			Routes.applicationGuildCommands(botConfig.applicationId, '343532544559546368'),
+			Routes.applicationGuildCommands(botConfig.applicationId, 'GUILDID'),
 			{ body: client.commands },
 		) .then((m) => m.forEach(async element => {
              
                 await rest.put(
-                    Routes.applicationCommandPermissions(botConfig.applicationId, '343532544559546368', element.id),
+                    Routes.applicationCommandPermissions(botConfig.applicationId, 'GUILDID', element.id),
                     { body: {permissions: (client.commands.find(m => m.name == element.name).permissions)}},  
                 )
         })) 
